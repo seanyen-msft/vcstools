@@ -31,7 +31,9 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import logging
-from os import extsep, path, readlink, curdir
+from os import name as osname, extsep, path, curdir 
+if osname != 'nt': 
+    from os import readlink 
 from subprocess import CalledProcessError, Popen, PIPE
 import sys
 import tarfile
@@ -132,7 +134,10 @@ class GitArchiver(object):
                         i = ZipInfo(arcname)
                         i.create_system = 3
                         i.external_attr = 0xA1ED0000
-                        archive.writestr(i, readlink(file_path))
+                        if osname == 'nt':
+                            self.LOG.error("Bad file link {0}...".format(file_path))
+                        else:
+                            archive.writestr(i, readlink(file_path))
             elif output_format in ['tar', 'bz2', 'gz', 'xz', 'tgz', 'txz']:
                 if output_format == 'tar':
                     t_mode = 'w'
