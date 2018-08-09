@@ -19,11 +19,12 @@ install:
   - SET PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
   - python --version
   - python -m pip install -U pip setuptools wheel
+  - python setup.py install
 
 build: none
 
 test_script:
   # Nosetests take care of unit tests
-  - nosetests -vv
+  - python setup.py test
 
 on_success: none
