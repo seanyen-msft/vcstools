@@ -1,0 +1,60 @@
+# Continuous integration procedure for AppVeyor
+# Based on https://github.com/rmcgibbo/python-appveyor-conda-example
+
+environment:
+
+  matrix:
+    - PYTHON: "C:\\Python27-x64"
+    - PYTHON: "C:\\Python35-x64"
+    - PYTHON: "C:\\Python36-x64"
+
+install:
+  - set PATH=C:\Program Files (x86)\GnuWin32\bin\;%PYTHON%\Scripts;%PYTHON%;%PATH%
+  - python --version
+  - python -m site
+  - python -m pip install -U pip setuptools wheel nose mock
+  - python setup.py install
+
+  # install bzip2
+  - ps: Start-FileDownload 'http://liquidtelecom.dl.sourceforge.net/project/gnuwin32/bzip2/1.0.5/bzip2-1.0.5-setup.exe'
+  - bzip2-1.0.5-setup.exe /VERYSILENT
+  - bzip2 --help
+
+  # install tar
+  - ps: Start-FileDownload 'http://liquidtelecom.dl.sourceforge.net/project/gnuwin32/libarchive/2.4.12-1/libarchive-2.4.12-1-setup.exe'
+  - libarchive-2.4.12-1-setup.exe /VERYSILENT
+  - mklink "C:\Program Files (x86)\GnuWin32\bin\tar.exe" "C:\Program Files (x86)\GnuWin32\bin\bsdtar.exe"
+  - where tar
+
+  # install bzr (python 2.7 is required)
+  - c:\python27\python -m pip install -U bzr --global-option build_ext --global-option --allow-python-fallback
+
+  # check all version control system versions
+  - hg --version
+  - bzr --version
+  - git --version
+  - svn --version
+
+  # change default encoding to utf-8 (for python 2.* only)
+  - ps: |
+      if ($(iex "python -c 'import platform; print(platform.python_version())'") -like "2*")
+      {
+        $user_site = iex 'python -m site --user-site'
+        mkdir $user_site
+        "import sys; sys.setdefaultencoding('utf-8');" | Out-File -Encoding UTF8 $(Join-Path $user_site "sitecustomize.py")
+        python -c "import sys; print(sys.getdefaultencoding())"
+      }
+  
+  # change the console encoding to utf-8
+  - chcp 65001
+
+build: none
+
+test_script:
+  # Nosetests take care of unit tests
+  - python -m nose --with-xunit
+
+on_finish:
+  - ps: |
+      $wc = New-Object 'System.Net.WebClient'
+      $wc.UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path .\nosetests.xml))

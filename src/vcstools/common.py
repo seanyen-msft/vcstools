@@ -43,6 +43,7 @@ import tempfile
 import shutil
 import threading
 import signal
+import stat
 
 try:
     # py3k
@@ -179,7 +180,10 @@ def normalized_rel_path(path, basepath):
     """
     # gracefully ignore invalid input absolute path + no basepath
     if path is None:
-        return basepath
+        if basepath is None:
+            return None
+        else:
+            return os.path.normpath(basepath)
     if os.path.isabs(path) and basepath is not None:
         return os.path.normpath(os.path.relpath(os.path.realpath(path), os.path.realpath(basepath)))
     return os.path.normpath(path)
@@ -283,7 +287,7 @@ def run_shell_command(cmd, cwd=None, shell=False, us_env=True,
     try:
         env = copy.copy(os.environ)
         if us_env:
-            env["LANG"] = "en_US.UTF-8"
+            env[str("LANG")] = str("en_US.UTF-8")
         if no_filter:
             # in no_filter mode, we cannot pipe stdin, as this
             # causes some prompts to be hidden (e.g. mercurial over
@@ -353,3 +357,20 @@ def run_shell_command(cmd, cwd=None, shell=False, us_env=True,
         message = "Command failed with OSError. '%s' <%s, %s>:\n%s" % (cmd, shell, cwd, ose)
         logger.error(message)
         raise VcsError(message)
+
+
+def _on_rmtree_error(func, path, exc_info):
+    """
+    path contains the path of the file that couldn't be removed
+    let's just assume that it's read-only and unlink it.
+    """
+    os.chmod(path, stat.S_IWRITE)
+    os.unlink(path)
+
+def rmtree(path):
+    """
+    In some platforms, for example, in Winodws, the shutil.rmtree is not
+    able to delete the read-only files. So when it hits this, try the best
+    effort to remove the read-only attribute and delete it again.
+    """
+    shutil.rmtree(path, onerror = _on_rmtree_error)

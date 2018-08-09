@@ -37,12 +37,15 @@ import os
 import unittest
 import subprocess
 import tempfile
-import shutil
 import tarfile
 import filecmp
+import posixpath
 from contextlib import closing
 
+from vcstools.common import rmtree
 from vcstools.git import GitClient
+
+from .util import _touch
 
 
 class GitClientTestSetups(unittest.TestCase):
@@ -73,7 +76,7 @@ class GitClientTestSetups(unittest.TestCase):
 
         # create a "remote" repo
         subprocess.check_call("git init", shell=True, cwd=self.repo_path)
-        subprocess.check_call("touch fixed.txt", shell=True, cwd=self.repo_path)
+        _touch(os.path.join(self.repo_path, "fixed.txt"))
         subprocess.check_call("git add fixed.txt", shell=True, cwd=self.repo_path)
         subprocess.check_call("git commit -m initial", shell=True, cwd=self.repo_path)
         subprocess.check_call("git tag test_tag", shell=True, cwd=self.repo_path)
@@ -84,14 +87,14 @@ class GitClientTestSetups(unittest.TestCase):
 
         # create a submodule repo
         subprocess.check_call("git init", shell=True, cwd=self.submodule_path)
-        subprocess.check_call("touch subfixed.txt", shell=True, cwd=self.submodule_path)
+        _touch(os.path.join(self.submodule_path, "subfixed.txt"))
         subprocess.check_call("git add *", shell=True, cwd=self.submodule_path)
         subprocess.check_call("git commit -m initial", shell=True, cwd=self.submodule_path)
         subprocess.check_call("git tag sub_test_tag", shell=True, cwd=self.submodule_path)
 
         # create a subsubmodule repo
         subprocess.check_call("git init", shell=True, cwd=self.subsubmodule_path)
-        subprocess.check_call("touch subsubfixed.txt", shell=True, cwd=self.subsubmodule_path)
+        _touch(os.path.join(self.subsubmodule_path, "subsubfixed.txt"))
         subprocess.check_call("git add *", shell=True, cwd=self.subsubmodule_path)
         subprocess.check_call("git commit -m initial", shell=True, cwd=self.subsubmodule_path)
         subprocess.check_call("git tag subsub_test_tag", shell=True, cwd=self.subsubmodule_path)
@@ -127,8 +130,9 @@ class GitClientTestSetups(unittest.TestCase):
         self.version_test = po.stdout.read().decode('UTF-8').rstrip('"').lstrip('"')
 
         # attach submodule using relative url, only in test_sub_relative
+        # git submodule uses forward slashes in every OS
         subprocess.check_call("git checkout master -b test_sub_relative", shell=True, cwd=self.repo_path)
-        subprocess.check_call("git submodule add %s %s" % (os.path.join('..', os.path.basename(self.submodule_path)),
+        subprocess.check_call("git submodule add %s %s" % (posixpath.join('..', os.path.basename(self.submodule_path)),
                                                            "submodule"), shell=True, cwd=self.repo_path)
 
         # this is needed only if git <= 1.7, during the time when submodules were being introduced (from 1.5.3)
@@ -162,13 +166,13 @@ class GitClientTestSetups(unittest.TestCase):
     @classmethod
     def tearDownClass(self):
         for d in self.directories:
-            shutil.rmtree(self.directories[d])
+            rmtree(self.directories[d])
 
     def tearDown(self):
         if os.path.exists(self.local_path):
-            shutil.rmtree(self.local_path)
+            rmtree(self.local_path)
         if os.path.exists(self.export_path):
-            shutil.rmtree(self.export_path)
+            rmtree(self.export_path)
 
 
 class GitClientTest(GitClientTestSetups):
@@ -458,7 +462,7 @@ class GitClientTest(GitClientTestSetups):
         self.assertTrue(subsubclient2.path_exists())
         self.assertTrue(subclient.path_exists())
         self.assertTrue(subsubclient.path_exists())
-        subprocess.check_call("touch submodif.txt", shell=True, cwd=self.sublocal2_path)
+        _touch(os.path.join(self.sublocal2_path, "submodif.txt"))
         subprocess.check_call("git add submodif.txt", shell=True, cwd=self.sublocal2_path)
         subprocess.check_call("git commit -m submodif", shell=True, cwd=self.sublocal2_path)
         subprocess.check_call("git add submodule2", shell=True, cwd=self.local_path)
@@ -487,13 +491,13 @@ class GitClientTest(GitClientTestSetups):
 
         with open(os.path.join(self.local_path, 'fixed.txt'), 'a') as f:
             f.write('0123456789abcdef')
-        subprocess.check_call("touch new.txt", shell=True, cwd=self.local_path)
+        _touch(os.path.join(self.local_path, "new.txt"))
         with open(os.path.join(self.sublocal_path, 'subfixed.txt'), 'a') as f:
             f.write('abcdef0123456789')
-        subprocess.check_call("touch subnew.txt", shell=True, cwd=self.sublocal_path)
+        _touch(os.path.join(self.sublocal_path, "subnew.txt"))
         with open(os.path.join(self.subsublocal_path, 'subsubfixed.txt'), 'a') as f:
             f.write('012345cdef')
-        subprocess.check_call("touch subsubnew.txt", shell=True, cwd=self.subsublocal_path)
+        _touch(os.path.join(self.subsublocal_path, "subsubnew.txt"))
 
         output = client.get_status(porcelain=True)  # porcelain=True ensures stable format
         self.assertEqual('''\
@@ -537,13 +541,13 @@ class GitClientTest(GitClientTestSetups):
 
         with open(os.path.join(self.local_path, 'fixed.txt'), 'a') as f:
             f.write('0123456789abcdef')
-        subprocess.check_call("touch new.txt", shell=True, cwd=self.local_path)
+        _touch(os.path.join(self.local_path, "new.txt"))
         with open(os.path.join(self.sublocal_path, 'subfixed.txt'), 'a') as f:
             f.write('abcdef0123456789')
-        subprocess.check_call("touch subnew.txt", shell=True, cwd=self.sublocal_path)
+        _touch(os.path.join(self.sublocal_path, "subnew.txt"))
         with open(os.path.join(self.subsublocal_path, 'subsubfixed.txt'), 'a') as f:
             f.write('012345cdef')
-        subprocess.check_call("touch subsubnew.txt", shell=True, cwd=self.subsublocal_path)
+        _touch(os.path.join(self.subsublocal_path, "subsubnew.txt"))
 
         output = client.get_diff()
         self.assertEqual(1094, len(output))

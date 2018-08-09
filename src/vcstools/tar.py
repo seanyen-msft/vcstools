@@ -42,12 +42,12 @@ tarfile with a folder inside for each version.
 from __future__ import absolute_import, print_function, unicode_literals
 import os
 import tempfile
-import shutil
 import tarfile
+import shutil
 import sys
 import yaml
 from vcstools.vcs_base import VcsClientBase, VcsError
-from vcstools.common import urlretrieve_netrc, ensure_dir_notexists
+from vcstools.common import urlretrieve_netrc, ensure_dir_notexists, rmtree
 
 
 __pychecker__ = 'unusednames=spec'
@@ -118,10 +118,11 @@ class TarClient(VcsClientBase):
                 subdirs = []
                 members = []
                 for m in temp_tarfile.getmembers():
-                    if m.name.startswith(version + '/'):
+                    norm_mname = os.path.normpath(m.name)
+                    if norm_mname.startswith(version + os.sep):
                         members.append(m)
-                    if m.name.split('/')[0] not in subdirs:
-                        subdirs.append(m.name.split('/')[0])
+                    if norm_mname.split(os.sep)[0] not in subdirs:
+                        subdirs.append(norm_mname.split(os.sep)[0])
                 if not members:
                     raise VcsError("%s is not a subdirectory with contents in members %s" % (version, subdirs))
                 subdir = os.path.join(tempdir, version)
@@ -144,7 +145,7 @@ class TarClient(VcsClientBase):
             self.logger.error("Tarball download unpack failed: %s" % str(exc))
         finally:
             if tempdir is not None and os.path.exists(tempdir):
-                shutil.rmtree(tempdir)
+                rmtree(tempdir)
         return result
 
     def update(self, version='', verbose=False, timeout=None):

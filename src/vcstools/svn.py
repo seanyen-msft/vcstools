@@ -50,7 +50,7 @@ import xml.dom.minidom  # For parsing logfiles
 
 from vcstools.vcs_base import VcsClientBase, VcsError
 from vcstools.common import sanitized, normalized_rel_path, \
-    run_shell_command, ensure_dir_notexists
+    run_shell_command, ensure_dir_notexists, rmtree
 
 
 def canonical_svn_url_split(url):
@@ -373,7 +373,6 @@ class SvnClient(VcsClientBase):
                 targzip_file.close()
         finally:
             # clean up
-            from shutil import rmtree
             rmtree(basepath)
         return True
 

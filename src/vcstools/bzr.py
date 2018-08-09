@@ -106,6 +106,8 @@ class BzrClient(VcsClientBase):
                     result = os.path.abspath(os.path.join(os.getcwd(), ppath))
                 else:
                     result = ppath
+        if result is not None:
+            result = os.path.normcase(result)
         return result
 
     def url_matches(self, url, url_or_shortcut):
@@ -190,8 +192,7 @@ class BzrClient(VcsClientBase):
         """
         if self.detect_presence():
             if spec is not None:
-                command = ['bzr log -r %s .' % sanitized(spec)]
-                _, output, _ = run_shell_command(command,
+                _, output, _ = run_shell_command('bzr log -r %s .' % sanitized(spec),
                                                  shell=True,
                                                  cwd=self._path,
                                                  us_env=True)

@@ -38,9 +38,10 @@ import io
 import unittest
 import subprocess
 import tempfile
-import shutil
 import re
+from vcstools.common import rmtree
 from vcstools.svn import SvnClient, canonical_svn_url_split, get_remote_contents
+from .util import _touch, _get_file_uri
 
 
 class SvnClientUtilTest(unittest.TestCase):
@@ -119,7 +120,7 @@ class SvnClientTestSetups(unittest.TestCase):
 
         # create a "remote" repo
         subprocess.check_call("svnadmin create %s" % self.remote_path, shell=True, cwd=self.root_directory)
-        self.local_root_url = "file://localhost" + self.remote_path
+        self.local_root_url = _get_file_uri(self.remote_path)
         self.local_url = self.local_root_url + "/trunk"
 
         # create an "init" repo to populate remote repo
@@ -129,8 +130,11 @@ class SvnClientTestSetups(unittest.TestCase):
             "mkdir trunk",
             "mkdir branches",
             "mkdir tags",
-            "svn add trunk branches tags",
-            "touch trunk/fixed.txt",
+            "svn add trunk branches tags"]:
+            subprocess.check_call(cmd, shell=True, cwd=self.init_path)
+
+        _touch(os.path.join(self.init_path, "trunk/fixed.txt"))
+        for cmd in [
             "svn add trunk/fixed.txt",
             "svn commit -m initial"]:
             subprocess.check_call(cmd, shell=True, cwd=self.init_path)
@@ -138,17 +142,17 @@ class SvnClientTestSetups(unittest.TestCase):
         self.local_version_init = "-r1"
 
         # files to be modified in "local" repo
+        _touch(os.path.join(self.init_path, "trunk/modified.txt"))
+        _touch(os.path.join(self.init_path, "trunk/modified-fs.txt"))
         for cmd in [
-            "touch trunk/modified.txt",
-            "touch trunk/modified-fs.txt",
             "svn add trunk/modified.txt trunk/modified-fs.txt",
             "svn commit -m initial"]:
             subprocess.check_call(cmd, shell=True, cwd=self.init_path)
 
         self.local_version_second = "-r2"
+        _touch(os.path.join(self.init_path, "trunk/deleted.txt"))
+        _touch(os.path.join(self.init_path, "trunk/deleted-fs.txt"))
         for cmd in [
-            "touch trunk/deleted.txt",
-            "touch trunk/deleted-fs.txt",
             "svn add trunk/deleted.txt trunk/deleted-fs.txt",
             "svn commit -m modified"]:
             subprocess.check_call(cmd, shell=True, cwd=self.init_path)
@@ -156,11 +160,11 @@ class SvnClientTestSetups(unittest.TestCase):
         self.local_version_master = "-r3"
 
         # files to be modified in "local" repo
+        subprocess.check_call("mkdir %s" % os.path.normpath("branches/foo"), shell=True, cwd=self.init_path)
+        _touch(os.path.join(self.init_path, "branches/foo/modified.txt"))
         for cmd in [
-            "mkdir branches/foo",
-            "touch branches/foo/modified.txt",
             "svn add branches/foo",
-            "svn commit -m 'foo branch'"]:
+            "svn commit -m \"foo branch\""]:
             subprocess.check_call(cmd, shell=True, cwd=self.init_path)
         self.branch_url = self.local_root_url + "/branches/foo"
         self.local_version_foo_branch = "-r4"
@@ -170,11 +174,11 @@ class SvnClientTestSetups(unittest.TestCase):
     @classmethod
     def tearDownClass(self):
         for d in self.directories:
-            shutil.rmtree(self.directories[d])
+            rmtree(self.directories[d])
 
     def tearDown(self):
         if os.path.exists(self.local_path):
-            shutil.rmtree(self.local_path)
+            rmtree(self.local_path)
 
 
 class SvnClientTest(SvnClientTestSetups):
@@ -348,7 +352,7 @@ class SvnDiffStatClientTest(SvnClientTestSetups):
         client = SvnClient(self.local_path)
         client.checkout(self.local_url)
         # after setting up "local" repo, change files and make some changes
-        subprocess.check_call("rm deleted-fs.txt", shell=True, cwd=self.local_path)
+        os.remove(os.path.join(self.local_path, "deleted-fs.txt"))
         subprocess.check_call("svn rm deleted.txt", shell=True, cwd=self.local_path)
         f = io.open(os.path.join(self.local_path, "modified.txt"), 'a')
         f.write('0123456789abcdef')
@@ -430,19 +434,35 @@ class SvnDiffStatClientTest(SvnClientTestSetups):
         client = SvnClient(self.local_path)
         self.assertTrue(client.path_exists())
         self.assertTrue(client.detect_presence())
-        self.assertStatusListEqual('A       added.txt\nD       deleted.txt\nM       modified-fs.txt\n!       deleted-fs.txt\nM       modified.txt\n', client.get_status())
+        self.assertStatusListEqual('''\
+A       added.txt
+D       deleted.txt
+M       modified-fs.txt
+!       deleted-fs.txt
+M       modified.txt''', client.get_status())
 
     def test_status_relpath(self):
         client = SvnClient(self.local_path)
         self.assertTrue(client.path_exists())
         self.assertTrue(client.detect_presence())
-        self.assertStatusListEqual('A       local/added.txt\nD       local/deleted.txt\nM       local/modified-fs.txt\n!       local/deleted-fs.txt\nM       local/modified.txt\n', client.get_status(basepath=os.path.dirname(self.local_path)))
+        self.assertStatusListEqual('''\
+A       local/added.txt
+D       local/deleted.txt
+M       local/modified-fs.txt
+!       local/deleted-fs.txt
+M       local/modified.txt'''.replace("/", os.path.sep) , client.get_status(basepath=os.path.dirname(self.local_path)))
 
     def test_status_untracked(self):
         client = SvnClient(self.local_path)
         self.assertTrue(client.path_exists())
         self.assertTrue(client.detect_presence())
-        self.assertStatusListEqual('?       added-fs.txt\nA       added.txt\nD       deleted.txt\nM       modified-fs.txt\n!       deleted-fs.txt\nM       modified.txt\n', client.get_status(untracked=True))
+        self.assertStatusListEqual('''\
+?       added-fs.txt
+A       added.txt
+D       deleted.txt
+M       modified-fs.txt
+!       deleted-fs.txt
+M       modified.txt''', client.get_status(untracked=True))
 
 
 class SvnExportRepositoryClientTest(SvnClientTestSetups):
@@ -490,14 +510,17 @@ class SvnGetBranchesClientTest(SvnClientTestSetups):
         local_path = os.path.join(self.root_directory, "local_nc")
         # create a "remote" repo
         subprocess.check_call("svnadmin create %s" % remote_path, shell=True, cwd=self.root_directory)
-        local_root_url = "file://localhost/" + remote_path
+        local_root_url = _get_file_uri(remote_path)
         local_url = local_root_url + "/footest"
         # create an "init" repo to populate remote repo
         subprocess.check_call("svn checkout %s %s" % (local_root_url, init_path), shell=True, cwd=self.root_directory)
         for cmd in [
             "mkdir footest",
-            "mkdir footest/foosub",
-            "touch footest/foosub/fixed.txt",
+            "mkdir %s" % os.path.normpath("footest/foosub")]:
+            subprocess.check_call(cmd, shell=True, cwd=init_path)
+
+        _touch(os.path.join(init_path, "footest/foosub/fixed.txt"))
+        for cmd in [
             "svn add footest",
             "svn commit -m initial"]:
             subprocess.check_call(cmd, shell=True, cwd=init_path)
@@ -511,8 +534,8 @@ class SvnGetBranchesClientTest(SvnClientTestSetups):
         self.assertEqual(['foo'], client.get_branches())
 
         # slyly create some empty branches
-        subprocess.check_call("mkdir -p branches/foo2", shell=True, cwd=self.init_path)
-        subprocess.check_call("mkdir -p branches/bar", shell=True, cwd=self.init_path)
+        subprocess.check_call("mkdir %s" % os.path.normpath("branches/foo2"), shell=True, cwd=self.init_path)
+        subprocess.check_call("mkdir %s" % os.path.normpath("branches/bar"), shell=True, cwd=self.init_path)
         subprocess.check_call("svn add branches/foo2", shell=True, cwd=self.init_path)
         subprocess.check_call("svn add branches/bar", shell=True, cwd=self.init_path)
         subprocess.check_call("svn commit -m newbranches", shell=True, cwd=self.init_path)

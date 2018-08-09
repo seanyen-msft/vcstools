@@ -56,15 +56,16 @@ disambiguation, and in some cases warns.
 from __future__ import absolute_import, print_function, unicode_literals
 import os
 import sys
-import shutil
 import tempfile
 import gzip
 import dateutil.parser  # For parsing date strings
 from distutils.version import LooseVersion
 import logging
+import posixpath
 
 from vcstools.vcs_base import VcsClientBase, VcsError
-from vcstools.common import sanitized, normalized_rel_path, run_shell_command
+from vcstools.common import sanitized, normalized_rel_path, run_shell_command, \
+    rmtree
 
 from vcstools.git_archive_all import *
 
@@ -85,14 +86,14 @@ def _git_diff_path_submodule_change(diff, rel_path_prefix):
     # the actual diff
     state = INIT
     result = ""
-    s_list = [line for line in diff.split(os.linesep)]
+    s_list = diff.splitlines()
     subrel_path = rel_path_prefix
     for line in s_list:
         newline = line
         if line.startswith("Entering '"):
             state = INIT
             submodulepath = line.rstrip("'")[len("Entering '"):]
-            subrel_path = os.path.join(rel_path_prefix, submodulepath)
+            subrel_path = posixpath.join(rel_path_prefix, submodulepath)
             continue
         if line.startswith("diff --git "):
             state = INIT
@@ -689,7 +690,7 @@ class GitClient(VcsClientBase):
         if (refname is not None and refname != '' and
                 version is not None and version != ''):
 
-            cmd = 'git rev-list %s ^%s --parents' % (sanitized(refname), sanitized(version))
+            cmd = 'git rev-list %s %s --parents' % (sanitized(refname), sanitized("^%s" % version))
             _, output, _ = run_shell_command(cmd, shell=True, cwd=self._path)
             for line in output.splitlines():
                 # can have 1, 2 or 3 elements (commit, parent1, parent2)
@@ -718,8 +719,12 @@ class GitClient(VcsClientBase):
             cmd = 'git show-ref -s'
             _, output, _ = run_shell_command(cmd, shell=True, cwd=self._path)
             refs = output.splitlines()
-            # 2000 seems like a number the linux shell can cope with
-            chunksize = 2000
+            if os.name == 'nt':
+                # 20 seems like a number the Windows shell can cope with
+                chunksize = 20
+            else:
+                # 2000 seems like a number the linux shell can cope with
+                chunksize = 2000
             refchunks = [refs[x:x + chunksize] for x in range(0, len(refs), chunksize)]
             for refchunk in refchunks:
                 # git log over all refs except HEAD
@@ -773,7 +778,7 @@ class GitClient(VcsClientBase):
                 else:
                     return False
             finally:
-                shutil.rmtree(tmpd_path)
+                rmtree(tmpd_path)
 
         except GitError:
             return False
