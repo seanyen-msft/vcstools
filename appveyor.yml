@@ -18,7 +18,7 @@ environment:
 install:
   - SET PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
   - python --version
-  - python -m pip install -U pip setuptools wheel
+  - python -m pip install -U pip setuptools wheel nose
   - python setup.py install
 
 build: none
