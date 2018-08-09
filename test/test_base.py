@@ -13,7 +13,7 @@ from vcstools.common import sanitized, normalized_rel_path, \
 
 
 def _pathname2url(pathname):
-    if (hasattr(urllib, '_pathname2url')):
+    if (hasattr(urllib, 'pathname2url')):
         from urllib import pathname2url
     else:
         from urllib.request import pathname2url
