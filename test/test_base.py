@@ -12,6 +12,13 @@ from vcstools.common import sanitized, normalized_rel_path, \
     run_shell_command, urlretrieve_netrc, _netrc_open, urlopen_netrc
 
 
+def _pathname2url(pathname):
+    if (hasattr(urllib, '_pathname2url')):
+        from urllib import pathname2url
+    else:
+        from urllib.request import pathname2url
+    return pathname2url(pathname)
+
 class BaseTest(unittest.TestCase):
 
     def test_normalized_rel_path(self):
