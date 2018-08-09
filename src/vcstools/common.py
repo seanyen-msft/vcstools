@@ -302,8 +302,6 @@ def run_shell_command(cmd, cwd=None, shell=False, us_env=True,
             else:
                 crflags['preexec_fn'] = os.setsid
 
-        print("env: ")
-        print(env)
         proc = subprocess.Popen(cmd,
                                 shell=shell,
                                 cwd=cwd,
