@@ -31,7 +31,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import logging
-from os import extsep, path, readlink, curdir
+from os import extsep, path, curdir
 from subprocess import CalledProcessError, Popen, PIPE
 import sys
 import tarfile
@@ -40,6 +40,13 @@ import re
 
 __version__ = "1.16.4"
 
+def os_readlink(file_path):
+    if hasattr(os, 'readlink'):
+        from os import readlink
+        return readlink(file_path)
+    else:
+        from os.path import realpath
+        return realpath(file_path)
 
 class GitArchiver(object):
     """
@@ -132,7 +139,7 @@ class GitArchiver(object):
                         i = ZipInfo(arcname)
                         i.create_system = 3
                         i.external_attr = 0xA1ED0000
-                        archive.writestr(i, readlink(file_path))
+                        archive.writestr(i, os_readlink(file_path))
             elif output_format in ['tar', 'bz2', 'gz', 'xz', 'tgz', 'txz']:
                 if output_format == 'tar':
                     t_mode = 'w'

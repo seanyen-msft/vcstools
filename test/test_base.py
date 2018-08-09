@@ -3,6 +3,7 @@ import os
 import unittest
 import tempfile
 import shutil
+import urllib
 from mock import Mock
 
 import vcstools
@@ -147,10 +148,10 @@ class BaseTest(unittest.TestCase):
             mockopen.open.return_value
             vcstools.common._netrc_open = Mock()
             vcstools.common._netrc_open.return_value = mockget
-            (fname, headers) = urlretrieve_netrc('file://' + examplename)
+            (fname, headers) = urlretrieve_netrc('file:' + urllib.pathname2url(examplename))
             self.assertTrue(fname)
             self.assertFalse(os.path.exists(outname))
-            (fname, headers) = urlretrieve_netrc('file://' + examplename,
+            (fname, headers) = urlretrieve_netrc('file:' + urllib.pathname2url(examplename),
                                                  outname)
             self.assertEqual(outname, fname)
             self.assertTrue(os.path.isfile(outname))
