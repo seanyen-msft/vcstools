@@ -18,6 +18,8 @@ environment:
 install:
   - SET PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
   - python --version
+  - python -c "import sys;
+    print(sys.getdefaultencoding())"
   - python -m pip install -U pip setuptools wheel
   - python setup.py install
 
