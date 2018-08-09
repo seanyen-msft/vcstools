@@ -1,14 +1,17 @@
 from __future__ import absolute_import, print_function, unicode_literals
 import os
 import unittest
+import sys
 import tempfile
-import shutil
+import urllib
 from mock import Mock
 
 import vcstools
 from vcstools.vcs_base import VcsClientBase, VcsError
 from vcstools.common import sanitized, normalized_rel_path, \
-    run_shell_command, urlretrieve_netrc, _netrc_open, urlopen_netrc
+    run_shell_command, urlretrieve_netrc, _netrc_open, urlopen_netrc, \
+    rmtree
+from .util import _get_file_uri
 
 
 class BaseTest(unittest.TestCase):
@@ -16,10 +19,10 @@ class BaseTest(unittest.TestCase):
     def test_normalized_rel_path(self):
         self.assertEqual(None, normalized_rel_path(None, None))
         self.assertEqual('foo', normalized_rel_path(None, 'foo'))
-        self.assertEqual('/foo', normalized_rel_path(None, '/foo'))
-        self.assertEqual('../bar', normalized_rel_path('/bar', '/foo'))
-        self.assertEqual('../bar', normalized_rel_path('/bar', '/foo/baz/..'))
-        self.assertEqual('../bar', normalized_rel_path('/bar/bam/foo/../..', '/foo/baz/..'))
+        self.assertEqual(os.path.normpath('/foo'), normalized_rel_path(None, '/foo'))
+        self.assertEqual(os.path.normpath('../bar'), normalized_rel_path('/bar', '/foo'))
+        self.assertEqual(os.path.normpath('../bar'), normalized_rel_path('/bar', '/foo/baz/..'))
+        self.assertEqual(os.path.normpath('../bar'), normalized_rel_path('/bar/bam/foo/../..', '/foo/baz/..'))
         self.assertEqual('bar', normalized_rel_path('bar/bam/foo/../..', '/foo/baz/..'))
 
     def test_sanitized(self):
@@ -57,8 +60,6 @@ class BaseTest(unittest.TestCase):
             pass
 
     def test_shell_command(self):
-        self.assertEqual((0, "", None), run_shell_command("true"))
-        self.assertEqual((1, "", None), run_shell_command("false"))
         self.assertEqual((0, "foo", None), run_shell_command("echo foo", shell=True))
         (v, r, e) = run_shell_command("[", shell=True)
         self.assertFalse(v == 0)
@@ -68,14 +69,19 @@ class BaseTest(unittest.TestCase):
         self.assertFalse(v == 0)
         self.assertFalse(e is None)
         self.assertEqual(r, 'foo')
-        # not a great test on a system where this is default
-        _, env_langs, _ = run_shell_command("/usr/bin/env |grep LANG=", shell=True, us_env=True)
-        self.assertTrue("LANG=en_US.UTF-8" in env_langs.splitlines())
         try:
             run_shell_command("two words")
             self.fail("expected exception")
         except:
             pass
+
+    @unittest.skipIf(sys.platform.startswith("win"), "skip Unix-like shell tests")
+    def test_shell_command_unix(self):
+        self.assertEqual((0, "", None), run_shell_command("true"))
+        self.assertEqual((1, "", None), run_shell_command("false"))
+        # not a great test on a system where this is default
+        _, env_langs, _ = run_shell_command("/usr/bin/env |grep LANG=", shell=True, us_env=True)
+        self.assertTrue("LANG=en_US.UTF-8" in env_langs.splitlines())
 
     def test_shell_command_verbose(self):
         # just check no Exception happens due to decoding
@@ -106,7 +112,7 @@ class BaseTest(unittest.TestCase):
             filelike = _netrc_open(None, netrcname)
             self.assertFalse(filelike)
         finally:
-            shutil.rmtree(root_directory)
+            rmtree(root_directory)
             vcstools.common.build_opener = back_build_opener
 
     def test_urlopen_netrc(self):
@@ -147,14 +153,14 @@ class BaseTest(unittest.TestCase):
             mockopen.open.return_value
             vcstools.common._netrc_open = Mock()
             vcstools.common._netrc_open.return_value = mockget
-            (fname, headers) = urlretrieve_netrc('file://' + examplename)
+            (fname, headers) = urlretrieve_netrc( _get_file_uri(examplename))
             self.assertTrue(fname)
             self.assertFalse(os.path.exists(outname))
-            (fname, headers) = urlretrieve_netrc('file://' + examplename,
+            (fname, headers) = urlretrieve_netrc(_get_file_uri(examplename),
                                                  outname)
             self.assertEqual(outname, fname)
             self.assertTrue(os.path.isfile(outname))
         finally:
             vcstools.common.urlopen = backopen
             vcstools.common._netrc_open = backget
-            shutil.rmtree(root_directory)
+            rmtree(root_directory)

@@ -46,7 +46,7 @@ import gzip
 import dateutil.parser  # For parsing date strings
 
 from vcstools.vcs_base import VcsClientBase, VcsError
-from vcstools.common import sanitized, normalized_rel_path, run_shell_command
+from vcstools.common import sanitized, normalized_rel_path, run_shell_command, rmtree
 
 
 def _get_hg_version():
@@ -78,7 +78,7 @@ def _hg_diff_path_change(diff, path):
     # the actual diff
     state = INIT
 
-    s_list = [line for line in diff.split(os.linesep)]
+    s_list = diff.splitlines()
     lines = []
     for line in s_list:
         if line.startswith("diff"):
@@ -277,7 +277,7 @@ class HgClient(VcsClientBase):
         return response
 
     def get_affected_files(self, revision):
-        cmd = "hg log -r %s --template '{files}'" % revision
+        cmd = "hg log -r %s --template \"{files}\"" % revision
         code, output, _ = run_shell_command(cmd, shell=True, cwd=self._path)
         affected = []
         if code == 0:
@@ -298,7 +298,7 @@ class HgClient(VcsClientBase):
                                          '{autor|email}', '{date|isodate}',
                                          '{desc}']) + '\x1e'
 
-            command = "hg log %s -b %s --template '%s' %s" % (sanitized(relpath),
+            command = "hg log %s -b %s --template \"%s\" %s" % (sanitized(relpath),
                                                               self.get_branch(),
                                                               HG_LOG_FORMAT,
                                                               limit_cmd)
