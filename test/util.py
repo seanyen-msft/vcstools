@@ -1,7 +1,7 @@
 import os
 import shutil
 import stat
-
+import urllib
 
 def _touch(path):
     with open(path, 'a'):
@@ -15,3 +15,10 @@ def _on_rmtree_error(func, path, exc_info):
 
 def _rmtree(path):
     shutil.rmtree(path, onerror = _on_rmtree_error)
+
+def _pathname2url(pathname):
+    if (hasattr(urllib, 'pathname2url')):
+        from urllib import pathname2url
+    else:
+        from urllib.request import pathname2url
+    return pathname2url(pathname)

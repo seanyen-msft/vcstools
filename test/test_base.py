@@ -9,15 +9,8 @@ import vcstools
 from vcstools.vcs_base import VcsClientBase, VcsError
 from vcstools.common import sanitized, normalized_rel_path, \
     run_shell_command, urlretrieve_netrc, _netrc_open, urlopen_netrc
-from .util import _rmtree
+from .util import _rmtree, _pathname2url
 
-
-def _pathname2url(pathname):
-    if (hasattr(urllib, 'pathname2url')):
-        from urllib import pathname2url
-    else:
-        from urllib.request import pathname2url
-    return pathname2url(pathname)
 
 class BaseTest(unittest.TestCase):
 
