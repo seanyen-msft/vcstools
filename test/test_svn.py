@@ -40,7 +40,7 @@ import subprocess
 import tempfile
 import re
 from vcstools.svn import SvnClient, canonical_svn_url_split, get_remote_contents
-from .util import _rmtree
+from .util import _touch, _rmtree
 
 
 class SvnClientUtilTest(unittest.TestCase):
@@ -129,8 +129,11 @@ class SvnClientTestSetups(unittest.TestCase):
             "mkdir trunk",
             "mkdir branches",
             "mkdir tags",
-            "svn add trunk branches tags",
-            "touch trunk/fixed.txt",
+            "svn add trunk branches tags"]:
+            subprocess.check_call(cmd, shell=True, cwd=self.init_path)
+
+        _touch(os.path.join(self.init_path, "trunk/fixed.txt"))
+        for cmd in [
             "svn add trunk/fixed.txt",
             "svn commit -m initial"]:
             subprocess.check_call(cmd, shell=True, cwd=self.init_path)
@@ -138,17 +141,17 @@ class SvnClientTestSetups(unittest.TestCase):
         self.local_version_init = "-r1"
 
         # files to be modified in "local" repo
+        _touch(os.path.join(self.init_path, "trunk/modified.txt"))
+        _touch(os.path.join(self.init_path, "trunk/modified-fs.txt"))
         for cmd in [
-            "touch trunk/modified.txt",
-            "touch trunk/modified-fs.txt",
             "svn add trunk/modified.txt trunk/modified-fs.txt",
             "svn commit -m initial"]:
             subprocess.check_call(cmd, shell=True, cwd=self.init_path)
 
         self.local_version_second = "-r2"
+        _touch(os.path.join(self.init_path, "trunk/deleted.txt"))
+        _touch(os.path.join(self.init_path, "trunk/deleted-fs.txt"))
         for cmd in [
-            "touch trunk/deleted.txt",
-            "touch trunk/deleted-fs.txt",
             "svn add trunk/deleted.txt trunk/deleted-fs.txt",
             "svn commit -m modified"]:
             subprocess.check_call(cmd, shell=True, cwd=self.init_path)
@@ -156,9 +159,9 @@ class SvnClientTestSetups(unittest.TestCase):
         self.local_version_master = "-r3"
 
         # files to be modified in "local" repo
+        subprocess.check_call("mkdir branches/foo", shell=True, cwd=self.init_path)
+        _touch(os.path.join(self.init_path, "branches/foo/modified.txt"))
         for cmd in [
-            "mkdir branches/foo",
-            "touch branches/foo/modified.txt",
             "svn add branches/foo",
             "svn commit -m 'foo branch'"]:
             subprocess.check_call(cmd, shell=True, cwd=self.init_path)
@@ -496,8 +499,11 @@ class SvnGetBranchesClientTest(SvnClientTestSetups):
         subprocess.check_call("svn checkout %s %s" % (local_root_url, init_path), shell=True, cwd=self.root_directory)
         for cmd in [
             "mkdir footest",
-            "mkdir footest/foosub",
-            "touch footest/foosub/fixed.txt",
+            "mkdir footest/foosub"]:
+            subprocess.check_call(cmd, shell=True, cwd=init_path)
+
+        _touch(os.path.join(self.init_path, "footest/foosub/fixed.txt"))
+        for cmd in [
             "svn add footest",
             "svn commit -m initial"]:
             subprocess.check_call(cmd, shell=True, cwd=init_path)
