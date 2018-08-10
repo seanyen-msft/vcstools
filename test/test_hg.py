@@ -38,9 +38,9 @@ import io
 import unittest
 import subprocess
 import tempfile
-import shutil
 
 from vcstools.hg import HgClient
+from .util import _touch, _rmtree
 
 
 os.environ[str('EMAIL')] = str('Your Name <name@example.com>')
@@ -57,9 +57,9 @@ class HGClientTestSetups(unittest.TestCase):
         os.makedirs(self.remote_path)
 
         # create a "remote" repo
+        subprocess.check_call("hg init", shell=True, cwd=self.remote_path)
+        _touch(os.path.join(self.remote_path, "fixed.txt"))
         for cmd in [
-                "hg init",
-                "touch fixed.txt",
                 "hg add fixed.txt",
                 "hg commit -m initial"]:
             subprocess.check_call(cmd, shell=True, cwd=self.remote_path)
@@ -69,10 +69,11 @@ class HGClientTestSetups(unittest.TestCase):
         # in hg, tagging creates an own changeset, so we need to fetch version before tagging
         subprocess.check_call("hg tag test_tag", shell=True, cwd=self.remote_path)
 
+        _touch(os.path.join(self.remote_path, "modified.txt"))
+        _touch(os.path.join(self.remote_path, "modified-fs.txt"))
+
         # files to be modified in "local" repo
         for cmd in [
-                "touch modified.txt",
-                "touch modified-fs.txt",
                 "hg add modified.txt modified-fs.txt",
                 "hg commit -m initial"]:
             subprocess.check_call(cmd, shell=True, cwd=self.remote_path)
@@ -80,9 +81,10 @@ class HGClientTestSetups(unittest.TestCase):
         po = subprocess.Popen("hg log --template '{node|short}' -l1", shell=True, cwd=self.remote_path, stdout=subprocess.PIPE)
         self.local_version_second = po.stdout.read().decode('UTF-8').rstrip("'").lstrip("'")
 
+        _touch(os.path.join(self.remote_path, "deleted.txt"))
+        _touch(os.path.join(self.remote_path, "deleted-fs.txt"))
+
         for cmd in [
-                "touch deleted.txt",
-                "touch deleted-fs.txt",
                 "hg add deleted.txt deleted-fs.txt",
                 "hg commit -m modified"]:
             subprocess.check_call(cmd, shell=True, cwd=self.remote_path)
@@ -94,9 +96,10 @@ class HGClientTestSetups(unittest.TestCase):
         self.local_url = self.remote_path
 
         # create a hg branch
+        subprocess.check_call("hg branch test_branch", shell=True, cwd=self.remote_path)
+        _touch(os.path.join(self.remote_path, "test.txt"))
+
         for cmd in [
-                "hg branch test_branch",
-                "touch test.txt",
                 "hg add test.txt",
                 "hg commit -m test"]:
             subprocess.check_call(cmd, shell=True, cwd=self.remote_path)
@@ -108,11 +111,11 @@ class HGClientTestSetups(unittest.TestCase):
     @classmethod
     def tearDownClass(self):
         for d in self.directories:
-            shutil.rmtree(self.directories[d])
+            _rmtree(self.directories[d])
 
     def tearDown(self):
         if os.path.exists(self.local_path):
-            shutil.rmtree(self.local_path)
+            _rmtree(self.local_path)
 
 
 class HGClientTest(HGClientTestSetups):
@@ -378,9 +381,10 @@ class HGRemoteFetchTest(HGClientTestSetups):
         self.assertEqual(client.get_remote_version(fetch=True), self.local_version)
         self.assertEqual(client.get_version(), self.local_version)
 
+        subprocess.check_call("hg checkout default", shell=True, cwd=self.remote_path)
+        _touch(os.path.join(self.remote_path, "remote_new.txt"))
+
         for cmd in [
-                "hg checkout default",
-                "touch remote_new.txt",
                 "hg add remote_new.txt",
                 "hg commit -m remote_new"]:
             subprocess.check_call(cmd, shell=True, cwd=self.remote_path)
@@ -443,8 +447,7 @@ class HGGetBranchesClientTest(HGClientTestSetups):
         # Make a remote branch
         subprocess.check_call('hg branch remote_branch', shell=True,
                               cwd=self.remote_path, stdout=subprocess.PIPE)
-        subprocess.check_call("touch fixed.txt", shell=True,
-                              cwd=self.remote_path)
+        _touch(os.path.join(self.remote_path, "fixed.txt"))
         subprocess.check_call("hg add fixed.txt", shell=True,
                               cwd=self.remote_path)
         subprocess.check_call("hg commit -m initial", shell=True,

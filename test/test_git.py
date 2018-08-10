@@ -38,7 +38,6 @@ import io
 import unittest
 import subprocess
 import tempfile
-import shutil
 import types
 import threading
 import time
@@ -47,7 +46,7 @@ from distutils.version import LooseVersion
 from vcstools import GitClient
 from vcstools.vcs_base import VcsError
 
-from .util import touch, on_rmtree_error
+from .util import _touch, _rmtree
 
 try:
     from socketserver import TCPServer, BaseRequestHandler
@@ -73,7 +72,7 @@ class GitClientTestSetups(unittest.TestCase):
 
         # create a "remote" repo
         subprocess.check_call("git init", shell=True, cwd=self.remote_path)
-        touch(os.path.join(self.remote_path, "fixed.txt"))
+        _touch(os.path.join(self.remote_path, "fixed.txt"))
         subprocess.check_call("git add *", shell=True, cwd=self.remote_path)
         subprocess.check_call("git commit -m initial", shell=True, cwd=self.remote_path)
         subprocess.check_call("git tag test_tag", shell=True, cwd=self.remote_path)
@@ -84,15 +83,15 @@ class GitClientTestSetups(unittest.TestCase):
         self.readonly_version_init = po.stdout.read().decode('UTF-8').rstrip('"').lstrip('"')
 
         # files to be modified in "local" repo
-        touch(os.path.join(self.remote_path, "modified.txt"))
-        touch(os.path.join(self.remote_path, "modified-fs.txt"))
+        _touch(os.path.join(self.remote_path, "modified.txt"))
+        _touch(os.path.join(self.remote_path, "modified-fs.txt"))
         subprocess.check_call("git add *", shell=True, cwd=self.remote_path)
         subprocess.check_call("git commit -m initial", shell=True, cwd=self.remote_path)
         po = subprocess.Popen("git log -n 1 --pretty=format:\"%H\"", shell=True, cwd=self.remote_path, stdout=subprocess.PIPE)
         self.readonly_version_second = po.stdout.read().decode('UTF-8').rstrip('"').lstrip('"')
 
-        touch(os.path.join(self.remote_path, "deleted.txt"))
-        touch(os.path.join(self.remote_path, "deleted-fs.txt"))
+        _touch(os.path.join(self.remote_path, "deleted.txt"))
+        _touch(os.path.join(self.remote_path, "deleted-fs.txt"))
         subprocess.check_call("git add *", shell=True, cwd=self.remote_path)
         subprocess.check_call("git commit -m modified", shell=True, cwd=self.remote_path)
         po = subprocess.Popen("git log -n 1 --pretty=format:\"%H\"", shell=True, cwd=self.remote_path, stdout=subprocess.PIPE)
@@ -102,11 +101,11 @@ class GitClientTestSetups(unittest.TestCase):
     @classmethod
     def tearDownClass(self):
         for d in self.directories:
-            shutil.rmtree(self.directories[d], onerror = on_rmtree_error)
+            _rmtree(self.directories[d])
 
     def tearDown(self):
         if os.path.exists(self.local_path):
-            shutil.rmtree(self.local_path, onerror = on_rmtree_error)
+            _rmtree(self.local_path)
 
 class GitSwitchDefaultBranchTest(GitClientTestSetups):
     def test_get_default_remote_version_label(self):
@@ -383,7 +382,7 @@ class GitClientTest(GitClientTestSetups):
         client = GitClient(self.local_path)
         self.assertTrue(client.checkout(url, "master"))
         subprocess.check_call("git reset --hard test_tag", shell=True, cwd=self.local_path)
-        touch(os.path.join(self.local_path, "diverged.txt"))
+        _touch(os.path.join(self.local_path, "diverged.txt"))
         subprocess.check_call("git add *", shell=True, cwd=self.local_path)
         subprocess.check_call("git commit -m diverge", shell=True, cwd=self.local_path)
         # fail because we have diverged
@@ -512,12 +511,12 @@ class GitClientUpdateTest(GitClientTestSetups):
         self.assertEqual('last_tag\ntest_tag\n', output)
         subprocess.check_call("git checkout test_tag", shell=True, cwd=self.remote_path)
         subprocess.check_call("git branch alt_branch", shell=True, cwd=self.remote_path)
-        touch(os.path.join(self.remote_path, "alt_file.txt"))
+        _touch(os.path.join(self.remote_path, "alt_file.txt"))
         subprocess.check_call("git add *", shell=True, cwd=self.remote_path)
         subprocess.check_call("git commit -m altfile", shell=True, cwd=self.remote_path)
         # switch to untracked
         subprocess.check_call("git checkout test_tag", shell=True, cwd=self.remote_path)
-        touch(os.path.join(self.remote_path, "new_file.txt"))
+        _touch(os.path.join(self.remote_path, "new_file.txt"))
         subprocess.check_call("git add *", shell=True, cwd=self.remote_path)
         subprocess.check_call("git commit -m newfile", shell=True, cwd=self.remote_path)
         subprocess.check_call("git tag new_tag", shell=True, cwd=self.remote_path)
@@ -551,7 +550,7 @@ class GitClientRemoteVersionFetchTest(GitClientTestSetups):
         self.assertEqual(client.get_remote_version(fetch=False), self.readonly_version)
         self.assertEqual(client.get_remote_version(fetch=True), self.readonly_version)
 
-        touch(os.path.join(self.remote_path, "new_file.txt"))
+        _touch(os.path.join(self.remote_path, "new_file.txt"))
         subprocess.check_call("git add *", shell=True, cwd=self.remote_path)
         subprocess.check_call("git commit -m newfile", shell=True, cwd=self.remote_path)
 
@@ -577,7 +576,7 @@ class GitClientLogTest(GitClientTestSetups):
         self.n_commits = 10
 
         for i in range(self.n_commits):
-            touch(os.path.join(self.local_path, "local_%d.txt" % i))
+            _touch(os.path.join(self.local_path, "local_%d.txt" % i))
             subprocess.check_call("git add local_%d.txt" % i, shell=True, cwd=self.local_path)
             subprocess.check_call("git commit -m \"local_%d\"" % i, shell=True, cwd=self.local_path)
 
@@ -610,7 +609,7 @@ class GitClientAffectedFiles(GitClientTestSetups):
         # Create some local untracking branch
 
         subprocess.check_call("git checkout test_tag -b localbranch", shell=True, cwd=self.local_path)
-        touch(os.path.join(self.local_path, "local_file"))
+        _touch(os.path.join(self.local_path, "local_file"))
         subprocess.check_call("git add local_file", shell=True, cwd=self.local_path)
         subprocess.check_call("git commit -m \"local_file\"", shell=True, cwd=self.local_path)
 
@@ -631,7 +630,7 @@ class GitClientDanglingCommitsTest(GitClientTestSetups):
         client.checkout(self.remote_path)
         # Create some local untracking branch
         subprocess.check_call("git checkout test_tag -b localbranch", shell=True, cwd=self.local_path)
-        touch(os.path.join(self.local_path, "local.txt"))
+        _touch(os.path.join(self.local_path, "local.txt"))
         subprocess.check_call("git add *", shell=True, cwd=self.local_path)
         subprocess.check_call("git commit -m my_branch", shell=True, cwd=self.local_path)
         subprocess.check_call("git tag my_branch_tag", shell=True, cwd=self.local_path)
@@ -640,7 +639,7 @@ class GitClientDanglingCommitsTest(GitClientTestSetups):
 
         # diverged branch
         subprocess.check_call("git checkout test_tag -b diverged_branch", shell=True, cwd=self.local_path)
-        touch(os.path.join(self.local_path, "diverged.txt"))
+        _touch(os.path.join(self.local_path, "diverged.txt"))
         subprocess.check_call("git add *", shell=True, cwd=self.local_path)
         subprocess.check_call("git commit -m diverged_branch", shell=True, cwd=self.local_path)
         po = subprocess.Popen("git log -n 1 --pretty=format:\"%H\"", shell=True, cwd=self.local_path, stdout=subprocess.PIPE)
@@ -649,7 +648,7 @@ class GitClientDanglingCommitsTest(GitClientTestSetups):
         # Go detached to create some dangling commits
         subprocess.check_call("git checkout test_tag", shell=True, cwd=self.local_path)
         # create a commit only referenced by tag
-        touch(os.path.join(self.local_path, "tagged.txt"))
+        _touch(os.path.join(self.local_path, "tagged.txt"))
         subprocess.check_call("git add *", shell=True, cwd=self.local_path)
         subprocess.check_call("git commit -m no_branch", shell=True, cwd=self.local_path)
         subprocess.check_call("git tag no_br_tag", shell=True, cwd=self.local_path)
@@ -657,7 +656,7 @@ class GitClientDanglingCommitsTest(GitClientTestSetups):
         self.no_br_tag_version = po.stdout.read().decode('UTF-8').rstrip('"').lstrip('"')
 
         # create a dangling commit
-        touch(os.path.join(self.local_path, "dangling.txt"))
+        _touch(os.path.join(self.local_path, "dangling.txt"))
         subprocess.check_call("git add *", shell=True, cwd=self.local_path)
         subprocess.check_call("git commit -m dangling", shell=True, cwd=self.local_path)
 
@@ -667,7 +666,7 @@ class GitClientDanglingCommitsTest(GitClientTestSetups):
         subprocess.check_call("git branch", shell=True, cwd=self.local_path)
 
         # create a dangling tip on top of dangling commit (to catch related bugs)
-        touch(os.path.join(self.local_path, "dangling-tip.txt"))
+        _touch(os.path.join(self.local_path, "dangling-tip.txt"))
         subprocess.check_call("git add *", shell=True, cwd=self.local_path)
         subprocess.check_call("git commit -m dangling_tip", shell=True, cwd=self.local_path)
 
@@ -1070,8 +1069,8 @@ class GitTimeoutTest(unittest.TestCase):
     def tearDownClass(self):
         self.mute_server.shutdown()
         if os.path.exists(self.root_directory):
-            shutil.rmtree(self.root_directory, onerror = on_rmtree_error)
+            _rmtree(self.root_directory)
 
     def tearDown(self):
         if os.path.exists(self.local_path):
-            shutil.rmtree(self.local_path, onerror = on_rmtree_error)
+            _rmtree(self.local_path)

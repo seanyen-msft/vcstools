@@ -2,7 +2,6 @@ from __future__ import absolute_import, print_function, unicode_literals
 import os
 import unittest
 import tempfile
-import shutil
 import urllib
 from mock import Mock
 
@@ -10,6 +9,7 @@ import vcstools
 from vcstools.vcs_base import VcsClientBase, VcsError
 from vcstools.common import sanitized, normalized_rel_path, \
     run_shell_command, urlretrieve_netrc, _netrc_open, urlopen_netrc
+from .util import _rmtree
 
 
 def _pathname2url(pathname):
@@ -114,7 +114,7 @@ class BaseTest(unittest.TestCase):
             filelike = _netrc_open(None, netrcname)
             self.assertFalse(filelike)
         finally:
-            shutil.rmtree(root_directory)
+            _rmtree(root_directory)
             vcstools.common.build_opener = back_build_opener
 
     def test_urlopen_netrc(self):
@@ -165,4 +165,4 @@ class BaseTest(unittest.TestCase):
         finally:
             vcstools.common.urlopen = backopen
             vcstools.common._netrc_open = backget
-            shutil.rmtree(root_directory)
+            _rmtree(root_directory)

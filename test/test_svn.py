@@ -38,9 +38,9 @@ import io
 import unittest
 import subprocess
 import tempfile
-import shutil
 import re
 from vcstools.svn import SvnClient, canonical_svn_url_split, get_remote_contents
+from .util import _rmtree
 
 
 class SvnClientUtilTest(unittest.TestCase):
@@ -170,11 +170,11 @@ class SvnClientTestSetups(unittest.TestCase):
     @classmethod
     def tearDownClass(self):
         for d in self.directories:
-            shutil.rmtree(self.directories[d])
+            _rmtree(self.directories[d])
 
     def tearDown(self):
         if os.path.exists(self.local_path):
-            shutil.rmtree(self.local_path)
+            _rmtree(self.local_path)
 
 
 class SvnClientTest(SvnClientTestSetups):

@@ -35,10 +35,10 @@ from __future__ import absolute_import, print_function, unicode_literals
 import os
 import unittest
 import tempfile
-import shutil
 import subprocess
 
 from vcstools.tar import TarClient
+from .util import _touch, _rmtree
 
 
 class TarClientTest(unittest.TestCase):
@@ -54,7 +54,7 @@ class TarClientTest(unittest.TestCase):
     def tearDown(self):
         for d in self.directories:
             self.assertTrue(os.path.exists(self.directories[d]))
-            shutil.rmtree(self.directories[d])
+            _rmtree(self.directories[d])
             self.assertFalse(os.path.exists(self.directories[d]))
 
     def test_get_url_by_reading(self):
@@ -151,10 +151,10 @@ class TarClientTestLocal(unittest.TestCase):
         os.makedirs(self.version_path1)
         os.makedirs(self.version_path2)
 
-        subprocess.check_call("touch stack0.xml", shell=True, cwd=self.version_path0)
-        subprocess.check_call("touch stack.xml", shell=True, cwd=self.version_path1)
-        subprocess.check_call("touch stack1.xml", shell=True, cwd=self.version_path2)
-        subprocess.check_call("touch version1.txt", shell=True, cwd=self.root_directory)
+        _touch(os.path.join(self.version_path0, "stack0.xml"))
+        _touch(os.path.join(self.version_path1, "stack.xml"))
+        _touch(os.path.join(self.version_path2, "stack1.xml"))
+        _touch(os.path.join(self.root_directory, "version1.txt"))
 
         self.tar_url = os.path.join(self.root_directory, "origin.tar")
         self.tar_url_compressed = os.path.join(self.root_directory,
@@ -176,7 +176,7 @@ class TarClientTestLocal(unittest.TestCase):
     def tearDown(self):
         for d in self.directories:
             self.assertTrue(os.path.exists(self.directories[d]))
-            shutil.rmtree(self.directories[d])
+            _rmtree(self.directories[d])
             self.assertFalse(os.path.exists(self.directories[d]))
 
     def test_checkout_version_local(self):
