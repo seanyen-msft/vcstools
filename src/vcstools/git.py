@@ -690,7 +690,7 @@ class GitClient(VcsClientBase):
         if (refname is not None and refname != '' and
                 version is not None and version != ''):
 
-            cmd = 'git rev-list %s \"^%s\" --parents' % (sanitized(refname), sanitized(version))
+            cmd = 'git rev-list %s %s --parents' % (sanitized(refname), sanitized("^%s" % version))
             _, output, _ = run_shell_command(cmd, shell=True, cwd=self._path)
             for line in output.splitlines():
                 # can have 1, 2 or 3 elements (commit, parent1, parent2)

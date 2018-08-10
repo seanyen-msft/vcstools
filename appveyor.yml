@@ -20,6 +20,8 @@ install:
   - python --version
   - python -m pip install -U pip setuptools wheel nose mock
   - python setup.py install
+  - cinst bzr
+  - refreshenv
 
 build: none
 

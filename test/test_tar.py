@@ -36,6 +36,7 @@ import os
 import unittest
 import tempfile
 import subprocess
+import sys
 
 from vcstools.tar import TarClient
 from .util import _touch, _rmtree

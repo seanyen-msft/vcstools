@@ -179,7 +179,10 @@ def normalized_rel_path(path, basepath):
     """
     # gracefully ignore invalid input absolute path + no basepath
     if path is None:
-        return basepath
+        if basepath is None:
+            return None
+        else:
+            return os.path.normpath(basepath)
     if os.path.isabs(path) and basepath is not None:
         return os.path.normpath(os.path.relpath(os.path.realpath(path), os.path.realpath(basepath)))
     return os.path.normpath(path)
