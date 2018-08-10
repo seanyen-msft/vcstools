@@ -26,8 +26,8 @@ build: none
 test_script:
   # Nosetests take care of unit tests
   - python -m nose --with-xunit
+
+on_finish:
   - ps: |
       $wc = New-Object 'System.Net.WebClient'
       $wc.UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path .\nosetests.xml))
-
-on_success: none
