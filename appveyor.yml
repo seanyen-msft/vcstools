@@ -1,0 +1,33 @@
+# Continuous integration procedure for AppVeyor
+# Based on https://github.com/rmcgibbo/python-appveyor-conda-example
+
+environment:
+
+  matrix:
+    - PYTHON: "C:\\Python27_64"
+      PYTHON_VERSION: "2.7"
+      PYTHON_ARCH: "64"
+      CONDA_PY: "27"
+
+    - PYTHON: "C:\\Python34_64"
+      PYTHON_VERSION: "3.4"
+      PYTHON_ARCH: "64"
+      CONDA_PY: "34"
+
+
+install:
+  - SET PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
+  - python --version
+  - python -m pip install -U pip setuptools wheel nose mock
+  - python setup.py install
+
+build: none
+
+test_script:
+  # Nosetests take care of unit tests
+  - python -m nose --with-xunit
+
+on_finish:
+  - ps: |
+      $wc = New-Object 'System.Net.WebClient'
+      $wc.UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path .\nosetests.xml))

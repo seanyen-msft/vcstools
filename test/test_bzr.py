@@ -44,7 +44,7 @@ import unittest
 from vcstools.bzr import BzrClient, _get_bzr_version
 
 
-os.environ['EMAIL'] = 'Your Name <name@example.com>'
+os.environ[str('EMAIL')] = str('Your Name <name@example.com>')
 
 
 class BzrClientTestSetups(unittest.TestCase):

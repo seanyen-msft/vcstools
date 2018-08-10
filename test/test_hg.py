@@ -43,7 +43,7 @@ import shutil
 from vcstools.hg import HgClient
 
 
-os.environ['EMAIL'] = 'Your Name <name@example.com>'
+os.environ[str('EMAIL')] = str('Your Name <name@example.com>')
 
 
 class HGClientTestSetups(unittest.TestCase):
