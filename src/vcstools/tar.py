@@ -43,11 +43,11 @@ from __future__ import absolute_import, print_function, unicode_literals
 import os
 import tempfile
 import tarfile
+import shutil
 import sys
 import yaml
 from vcstools.vcs_base import VcsClientBase, VcsError
 from vcstools.common import urlretrieve_netrc, ensure_dir_notexists
-from .util import _rmtree
 
 __pychecker__ = 'unusednames=spec'
 
@@ -143,7 +143,7 @@ class TarClient(VcsClientBase):
             self.logger.error("Tarball download unpack failed: %s" % str(exc))
         finally:
             if tempdir is not None and os.path.exists(tempdir):
-                _rmtree(tempdir)
+                shutil.rmtree(tempdir)
         return result
 
     def update(self, version='', verbose=False, timeout=None):

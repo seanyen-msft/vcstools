@@ -373,8 +373,8 @@ class SvnClient(VcsClientBase):
                 targzip_file.close()
         finally:
             # clean up
-            from .util import _rmtree
-            _rmtree(basepath)
+            from shutil import rmtree
+            shutil.rmtree(basepath)
         return True
 
     def get_branches(self, local_only=False):
