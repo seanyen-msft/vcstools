@@ -46,7 +46,7 @@ from distutils.version import LooseVersion
 from vcstools import GitClient
 from vcstools.vcs_base import VcsError
 
-from .util import _touch, _rmtree
+from .util import _touch, _rmtree, _get_file_uri
 
 try:
     from socketserver import TCPServer, BaseRequestHandler
@@ -241,7 +241,7 @@ class GitClientTest(GitClientTestSetups):
         self.assertEqual(0, client.fast_forwards)
 
     def test_checkout_shallow(self):
-        url = 'file://' + self.remote_path
+        url = _get_file_uri(self.remote_path)
         client = GitClient(self.local_path)
         self.assertFalse(client.path_exists())
         self.assertFalse(client.detect_presence())

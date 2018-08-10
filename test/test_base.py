@@ -9,7 +9,7 @@ import vcstools
 from vcstools.vcs_base import VcsClientBase, VcsError
 from vcstools.common import sanitized, normalized_rel_path, \
     run_shell_command, urlretrieve_netrc, _netrc_open, urlopen_netrc
-from .util import _rmtree, _pathname2url
+from .util import _rmtree, _get_file_uri
 
 
 class BaseTest(unittest.TestCase):
@@ -148,10 +148,10 @@ class BaseTest(unittest.TestCase):
             mockopen.open.return_value
             vcstools.common._netrc_open = Mock()
             vcstools.common._netrc_open.return_value = mockget
-            (fname, headers) = urlretrieve_netrc('file:' + _pathname2url(examplename))
+            (fname, headers) = urlretrieve_netrc( _get_file_uri(examplename))
             self.assertTrue(fname)
             self.assertFalse(os.path.exists(outname))
-            (fname, headers) = urlretrieve_netrc('file:' + _pathname2url(examplename),
+            (fname, headers) = urlretrieve_netrc(_get_file_uri(examplename),
                                                  outname)
             self.assertEqual(outname, fname)
             self.assertTrue(os.path.isfile(outname))

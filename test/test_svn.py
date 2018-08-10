@@ -40,7 +40,7 @@ import subprocess
 import tempfile
 import re
 from vcstools.svn import SvnClient, canonical_svn_url_split, get_remote_contents
-from .util import _touch, _rmtree, _pathname2url
+from .util import _touch, _rmtree, _get_file_uri
 
 
 class SvnClientUtilTest(unittest.TestCase):
@@ -119,7 +119,7 @@ class SvnClientTestSetups(unittest.TestCase):
 
         # create a "remote" repo
         subprocess.check_call("svnadmin create %s" % self.remote_path, shell=True, cwd=self.root_directory)
-        self.local_root_url = "file:" + _pathname2url(self.remote_path)
+        self.local_root_url = _get_file_uri(self.remote_path)
         self.local_url = self.local_root_url + "/trunk"
 
         # create an "init" repo to populate remote repo
@@ -509,7 +509,7 @@ class SvnGetBranchesClientTest(SvnClientTestSetups):
         local_path = os.path.join(self.root_directory, "local_nc")
         # create a "remote" repo
         subprocess.check_call("svnadmin create %s" % remote_path, shell=True, cwd=self.root_directory)
-        local_root_url = "file:" + _pathname2url(remote_path)
+        local_root_url = _get_file_uri(remote_path)
         local_url = local_root_url + "/footest"
         # create an "init" repo to populate remote repo
         subprocess.check_call("svn checkout %s %s" % (local_root_url, init_path), shell=True, cwd=self.root_directory)
