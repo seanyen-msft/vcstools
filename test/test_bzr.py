@@ -44,6 +44,7 @@ import unittest
 from vcstools.bzr import BzrClient, _get_bzr_version
 from .util import _touch, _rmtree
 
+
 os.environ[str('EMAIL')] = str('Your Name <name@example.com>')
 
 

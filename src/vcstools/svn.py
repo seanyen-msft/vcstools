@@ -374,7 +374,7 @@ class SvnClient(VcsClientBase):
         finally:
             # clean up
             from shutil import rmtree
-            shutil.rmtree(basepath)
+            rmtree(basepath)
         return True
 
     def get_branches(self, local_only=False):

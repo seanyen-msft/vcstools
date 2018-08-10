@@ -502,7 +502,7 @@ class SvnGetBranchesClientTest(SvnClientTestSetups):
             "mkdir footest/foosub"]:
             subprocess.check_call(cmd, shell=True, cwd=init_path)
 
-        _touch(os.path.join(self.init_path, "footest/foosub/fixed.txt"))
+        _touch(os.path.join(init_path, "footest/foosub/fixed.txt"))
         for cmd in [
             "svn add footest",
             "svn commit -m initial"]:
