@@ -42,6 +42,7 @@ import subprocess
 import tempfile
 import unittest
 from vcstools.bzr import BzrClient, _get_bzr_version
+from .util import _touch, _rmtree
 
 
 os.environ[str('EMAIL')] = str('Your Name <name@example.com>')
@@ -58,21 +59,21 @@ class BzrClientTestSetups(unittest.TestCase):
 
         # create a "remote" repo
         subprocess.check_call(["bzr", "init"], cwd=self.remote_path)
-        subprocess.check_call(["touch", "fixed.txt"], cwd=self.remote_path)
+        _touch(os.path.join(self.remote_path, "fixed.txt"))
         subprocess.check_call(["bzr", "add", "fixed.txt"], cwd=self.remote_path)
         subprocess.check_call(["bzr", "commit", "-m", "initial"], cwd=self.remote_path)
         subprocess.check_call(["bzr", "tag", "test_tag"], cwd=self.remote_path)
         self.local_version_init = "1"
 
         # files to be modified in "local" repo
-        subprocess.check_call(["touch", "modified.txt"], cwd=self.remote_path)
-        subprocess.check_call(["touch", "modified-fs.txt"], cwd=self.remote_path)
+        _touch(os.path.join(self.remote_path, "modified.txt"))
+        _touch(os.path.join(self.remote_path, "modified-fs.txt"))
         subprocess.check_call(["bzr", "add", "modified.txt", "modified-fs.txt"], cwd=self.remote_path)
         subprocess.check_call(["bzr", "commit", "-m", "initial"], cwd=self.remote_path)
         self.local_version_second = "2"
 
-        subprocess.check_call(["touch", "deleted.txt"], cwd=self.remote_path)
-        subprocess.check_call(["touch", "deleted-fs.txt"], cwd=self.remote_path)
+        _touch(os.path.join(self.remote_path, "deleted.txt"))
+        _touch(os.path.join(self.remote_path, "deleted-fs.txt"))
         subprocess.check_call(["bzr", "add", "deleted.txt", "deleted-fs.txt"], cwd=self.remote_path)
         subprocess.check_call(["bzr", "commit", "-m", "modified"], cwd=self.remote_path)
         self.local_version = "3"
@@ -82,11 +83,11 @@ class BzrClientTestSetups(unittest.TestCase):
     @classmethod
     def tearDownClass(self):
         for d in self.directories:
-            shutil.rmtree(self.directories[d])
+            _rmtree(self.directories[d])
 
     def tearDown(self):
         if os.path.exists(self.local_path):
-            shutil.rmtree(self.local_path)
+            _rmtree(self.local_path)
 
 
 class BzrClientTest(BzrClientTestSetups):
