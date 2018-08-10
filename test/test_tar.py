@@ -36,11 +36,13 @@ import os
 import unittest
 import tempfile
 import subprocess
+import sys
 
 from vcstools.tar import TarClient
 from .util import _touch, _rmtree
 
 
+@unittest.skipIf(sys.platform.startswith("win"), "skip on Windows")
 class TarClientTest(unittest.TestCase):
 
     @classmethod
@@ -137,6 +139,7 @@ class TarClientTest(unittest.TestCase):
         self.assertTrue('version' in client.get_environment_metadata())
 
 
+@unittest.skipIf(sys.platform.startswith("win"), "skip on Windows")
 class TarClientTestLocal(unittest.TestCase):
 
     def setUp(self):
