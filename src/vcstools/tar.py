@@ -42,12 +42,13 @@ tarfile with a folder inside for each version.
 from __future__ import absolute_import, print_function, unicode_literals
 import os
 import tempfile
-import tarfile
 import shutil
+import tarfile
 import sys
 import yaml
 from vcstools.vcs_base import VcsClientBase, VcsError
 from vcstools.common import urlretrieve_netrc, ensure_dir_notexists
+
 
 __pychecker__ = 'unusednames=spec'
 
