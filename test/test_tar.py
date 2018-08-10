@@ -42,7 +42,7 @@ from vcstools.tar import TarClient
 from .util import _touch, _rmtree
 
 
-@unittest.skipIf(sys.platform.startswith("win"), "skip on Windows")
+@unittest.skipIf(sys.platform.startswith("win"), "skip on Windows before we figure out what tar tool to use")
 class TarClientTest(unittest.TestCase):
 
     @classmethod
@@ -139,7 +139,7 @@ class TarClientTest(unittest.TestCase):
         self.assertTrue('version' in client.get_environment_metadata())
 
 
-@unittest.skipIf(sys.platform.startswith("win"), "skip on Windows")
+@unittest.skipIf(sys.platform.startswith("win"), "skip on Windows before we figure out what tar tool to use")
 class TarClientTestLocal(unittest.TestCase):
 
     def setUp(self):

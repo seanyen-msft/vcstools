@@ -1,6 +1,7 @@
 from __future__ import absolute_import, print_function, unicode_literals
 import os
 import unittest
+import sys
 import tempfile
 import urllib
 from mock import Mock
@@ -17,10 +18,10 @@ class BaseTest(unittest.TestCase):
     def test_normalized_rel_path(self):
         self.assertEqual(None, normalized_rel_path(None, None))
         self.assertEqual('foo', normalized_rel_path(None, 'foo'))
-        self.assertEqual('/foo', normalized_rel_path(None, '/foo'))
-        self.assertEqual('../bar', normalized_rel_path('/bar', '/foo'))
-        self.assertEqual('../bar', normalized_rel_path('/bar', '/foo/baz/..'))
-        self.assertEqual('../bar', normalized_rel_path('/bar/bam/foo/../..', '/foo/baz/..'))
+        self.assertEqual(os.path.normpath('/foo'), normalized_rel_path(None, '/foo'))
+        self.assertEqual(os.path.normpath('../bar'), normalized_rel_path('/bar', '/foo'))
+        self.assertEqual(os.path.normpath('../bar'), normalized_rel_path('/bar', '/foo/baz/..'))
+        self.assertEqual(os.path.normpath('../bar'), normalized_rel_path('/bar/bam/foo/../..', '/foo/baz/..'))
         self.assertEqual('bar', normalized_rel_path('bar/bam/foo/../..', '/foo/baz/..'))
 
     def test_sanitized(self):
@@ -58,8 +59,6 @@ class BaseTest(unittest.TestCase):
             pass
 
     def test_shell_command(self):
-        self.assertEqual((0, "", None), run_shell_command("true"))
-        self.assertEqual((1, "", None), run_shell_command("false"))
         self.assertEqual((0, "foo", None), run_shell_command("echo foo", shell=True))
         (v, r, e) = run_shell_command("[", shell=True)
         self.assertFalse(v == 0)
@@ -69,14 +68,19 @@ class BaseTest(unittest.TestCase):
         self.assertFalse(v == 0)
         self.assertFalse(e is None)
         self.assertEqual(r, 'foo')
-        # not a great test on a system where this is default
-        _, env_langs, _ = run_shell_command("/usr/bin/env |grep LANG=", shell=True, us_env=True)
-        self.assertTrue("LANG=en_US.UTF-8" in env_langs.splitlines())
         try:
             run_shell_command("two words")
             self.fail("expected exception")
         except:
             pass
+
+    @unittest.skipIf(sys.platform.startswith("win"), "skip Unix-like shell tests")
+    def test_shell_command_unix(self):
+        self.assertEqual((0, "", None), run_shell_command("true"))
+        self.assertEqual((1, "", None), run_shell_command("false"))
+        # not a great test on a system where this is default
+        _, env_langs, _ = run_shell_command("/usr/bin/env |grep LANG=", shell=True, us_env=True)
+        self.assertTrue("LANG=en_US.UTF-8" in env_langs.splitlines())
 
     def test_shell_command_verbose(self):
         # just check no Exception happens due to decoding
