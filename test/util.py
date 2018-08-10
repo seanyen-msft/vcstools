@@ -25,4 +25,8 @@ def _pathname2url(pathname):
     return pathname2url(pathname)
 
 def _get_file_uri(pathname):
-    return urlparse.urljoin('file:', _pathname2url(pathname))
+    if (hasattr(urllib, 'parse')):
+        from urllib.parse import urljoin
+    else:
+        from urlparse import urljoin
+    return urljoin('file:', _pathname2url(pathname))
