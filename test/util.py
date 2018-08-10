@@ -3,7 +3,7 @@ import shutil
 import stat
 
 
-def touch(path):
+def _touch(path):
     with open(path, 'a'):
         os.utime(path, None)
 
