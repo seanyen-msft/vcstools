@@ -2,7 +2,6 @@ import os
 import shutil
 import stat
 import urllib
-import urlparse
 
 def _touch(path):
     with open(path, 'a'):
@@ -28,5 +27,6 @@ def _get_file_uri(pathname):
     if (hasattr(urllib, 'parse')):
         from urllib.parse import urljoin
     else:
+        import urlparse
         from urlparse import urljoin
     return urljoin('file:', _pathname2url(pathname))

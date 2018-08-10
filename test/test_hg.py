@@ -64,7 +64,7 @@ class HGClientTestSetups(unittest.TestCase):
                 "hg commit -m initial"]:
             subprocess.check_call(cmd, shell=True, cwd=self.remote_path)
 
-        po = subprocess.Popen("hg log --template '{node|short}' -l1", shell=True, cwd=self.remote_path, stdout=subprocess.PIPE)
+        po = subprocess.Popen("hg log --template \"{node|short}\" -l1", shell=True, cwd=self.remote_path, stdout=subprocess.PIPE)
         self.local_version_init = po.stdout.read().decode('UTF-8').rstrip("'").lstrip("'")
         # in hg, tagging creates an own changeset, so we need to fetch version before tagging
         subprocess.check_call("hg tag test_tag", shell=True, cwd=self.remote_path)
@@ -78,7 +78,7 @@ class HGClientTestSetups(unittest.TestCase):
                 "hg commit -m initial"]:
             subprocess.check_call(cmd, shell=True, cwd=self.remote_path)
 
-        po = subprocess.Popen("hg log --template '{node|short}' -l1", shell=True, cwd=self.remote_path, stdout=subprocess.PIPE)
+        po = subprocess.Popen("hg log --template \"{node|short}\" -l1", shell=True, cwd=self.remote_path, stdout=subprocess.PIPE)
         self.local_version_second = po.stdout.read().decode('UTF-8').rstrip("'").lstrip("'")
 
         _touch(os.path.join(self.remote_path, "deleted.txt"))
@@ -89,7 +89,7 @@ class HGClientTestSetups(unittest.TestCase):
                 "hg commit -m modified"]:
             subprocess.check_call(cmd, shell=True, cwd=self.remote_path)
 
-        po = subprocess.Popen("hg log --template '{node|short}' -l1", shell=True, cwd=self.remote_path, stdout=subprocess.PIPE)
+        po = subprocess.Popen("hg log --template \"{node|short}\" -l1", shell=True, cwd=self.remote_path, stdout=subprocess.PIPE)
         self.local_version = po.stdout.read().decode('UTF-8').rstrip("'").lstrip("'")
 
         self.local_path = os.path.join(self.root_directory, "local")
@@ -104,7 +104,7 @@ class HGClientTestSetups(unittest.TestCase):
                 "hg commit -m test"]:
             subprocess.check_call(cmd, shell=True, cwd=self.remote_path)
 
-        po = subprocess.Popen("hg log --template '{node|short}' -l1", shell=True, cwd=self.remote_path, stdout=subprocess.PIPE)
+        po = subprocess.Popen("hg log --template \"{node|short}\" -l1", shell=True, cwd=self.remote_path, stdout=subprocess.PIPE)
         self.branch_version = po.stdout.read().decode('UTF-8').rstrip("'").lstrip("'")
 
 
@@ -310,7 +310,7 @@ class HGDiffStatClientTest(HGClientTestSetups):
         client = HgClient(self.local_path)
         client.checkout(url)
         # after setting up "local" repo, change files and make some changes
-        subprocess.check_call("rm deleted-fs.txt", shell=True, cwd=self.local_path)
+        os.remove(os.path.join(self.local_path, "deleted-fs.txt"))
         subprocess.check_call("hg rm deleted.txt", shell=True, cwd=self.local_path)
         f = io.open(os.path.join(self.local_path, "modified.txt"), 'a')
         f.write('0123456789abcdef')
@@ -334,7 +334,28 @@ class HGDiffStatClientTest(HGClientTestSetups):
         client = HgClient(self.local_path)
         self.assertTrue(client.path_exists())
         self.assertTrue(client.detect_presence())
-        self.assertEquals('diff --git ./added.txt ./added.txt\nnew file mode 100644\n--- /dev/null\n+++ ./added.txt\n@@ -0,0 +1,1 @@\n+0123456789abcdef\n\\ No newline at end of file\ndiff --git ./deleted.txt ./deleted.txt\ndeleted file mode 100644\ndiff --git ./modified-fs.txt ./modified-fs.txt\n--- ./modified-fs.txt\n+++ ./modified-fs.txt\n@@ -0,0 +1,1 @@\n+0123456789abcdef\n\\ No newline at end of file\ndiff --git ./modified.txt ./modified.txt\n--- ./modified.txt\n+++ ./modified.txt\n@@ -0,0 +1,1 @@\n+0123456789abcdef\n\\ No newline at end of file', client.get_diff())
+        self.assertEquals('''\
+diff --git ./added.txt ./added.txt
+new file mode 100644
+--- /dev/null
++++ ./added.txt
+@@ -0,0 +1,1 @@
++0123456789abcdef
+\\ No newline at end of file
+diff --git ./deleted.txt ./deleted.txt
+deleted file mode 100644
+diff --git ./modified-fs.txt ./modified-fs.txt
+--- ./modified-fs.txt
++++ ./modified-fs.txt
+@@ -0,0 +1,1 @@
++0123456789abcdef
+\\ No newline at end of file
+diff --git ./modified.txt ./modified.txt
+--- ./modified.txt
++++ ./modified.txt
+@@ -0,0 +1,1 @@
++0123456789abcdef
+\\ No newline at end of file''', client.get_diff())
 
     def test_diff_relpath(self):
 
@@ -342,7 +363,28 @@ class HGDiffStatClientTest(HGClientTestSetups):
         self.assertTrue(client.path_exists())
         self.assertTrue(client.detect_presence())
 
-        self.assertEquals('diff --git local/added.txt local/added.txt\nnew file mode 100644\n--- /dev/null\n+++ local/added.txt\n@@ -0,0 +1,1 @@\n+0123456789abcdef\n\\ No newline at end of file\ndiff --git local/deleted.txt local/deleted.txt\ndeleted file mode 100644\ndiff --git local/modified-fs.txt local/modified-fs.txt\n--- local/modified-fs.txt\n+++ local/modified-fs.txt\n@@ -0,0 +1,1 @@\n+0123456789abcdef\n\\ No newline at end of file\ndiff --git local/modified.txt local/modified.txt\n--- local/modified.txt\n+++ local/modified.txt\n@@ -0,0 +1,1 @@\n+0123456789abcdef\n\\ No newline at end of file', client.get_diff(basepath=os.path.dirname(self.local_path)))
+        self.assertEquals('''\
+diff --git local/added.txt local/added.txt
+new file mode 100644
+--- /dev/null
++++ local/added.txt
+@@ -0,0 +1,1 @@
++0123456789abcdef
+\\ No newline at end of file
+diff --git local/deleted.txt local/deleted.txt
+deleted file mode 100644
+diff --git local/modified-fs.txt local/modified-fs.txt
+--- local/modified-fs.txt
++++ local/modified-fs.txt
+@@ -0,0 +1,1 @@
++0123456789abcdef
+\\ No newline at end of file
+diff --git local/modified.txt local/modified.txt
+--- local/modified.txt
++++ local/modified.txt
+@@ -0,0 +1,1 @@
++0123456789abcdef
+\\ No newline at end of file''', client.get_diff(basepath=os.path.dirname(self.local_path)))
 
     def test_get_version_modified(self):
         client = HgClient(self.local_path)
@@ -352,19 +394,38 @@ class HGDiffStatClientTest(HGClientTestSetups):
         client = HgClient(self.local_path)
         self.assertTrue(client.path_exists())
         self.assertTrue(client.detect_presence())
-        self.assertEquals('M modified-fs.txt\nM modified.txt\nA added.txt\nR deleted.txt\n! deleted-fs.txt\n', client.get_status())
+        self.assertEquals('''\
+M modified-fs.txt
+M modified.txt
+A added.txt
+R deleted.txt
+! deleted-fs.txt
+''', client.get_status())
 
     def test_status_relpath(self):
         client = HgClient(self.local_path)
         self.assertTrue(client.path_exists())
         self.assertTrue(client.detect_presence())
-        self.assertEquals('M local/modified-fs.txt\nM local/modified.txt\nA local/added.txt\nR local/deleted.txt\n! local/deleted-fs.txt\n', client.get_status(basepath=os.path.dirname(self.local_path)))
+        self.assertEquals('''\
+M local/modified-fs.txt
+M local/modified.txt
+A local/added.txt
+R local/deleted.txt
+! local/deleted-fs.txt
+'''.replace("/", os.path.sep), client.get_status(basepath=os.path.dirname(self.local_path)))
 
     def testStatusUntracked(self):
         client = HgClient(self.local_path)
         self.assertTrue(client.path_exists())
         self.assertTrue(client.detect_presence())
-        self.assertEquals('M modified-fs.txt\nM modified.txt\nA added.txt\nR deleted.txt\n! deleted-fs.txt\n? added-fs.txt\n', client.get_status(untracked=True))
+        self.assertEquals('''\
+M modified-fs.txt
+M modified.txt
+A added.txt
+R deleted.txt
+! deleted-fs.txt
+? added-fs.txt
+''', client.get_status(untracked=True))
 
     def test_hg_diff_path_change_None(self):
         from vcstools.hg import _hg_diff_path_change
@@ -388,7 +449,7 @@ class HGRemoteFetchTest(HGClientTestSetups):
                 "hg add remote_new.txt",
                 "hg commit -m remote_new"]:
             subprocess.check_call(cmd, shell=True, cwd=self.remote_path)
-        po = subprocess.Popen("hg log --template '{node|short}' -l1", shell=True, cwd=self.remote_path, stdout=subprocess.PIPE)
+        po = subprocess.Popen("hg log --template \"{node|short}\" -l1", shell=True, cwd=self.remote_path, stdout=subprocess.PIPE)
         remote_new_version = po.stdout.read().decode('UTF-8').rstrip("'").lstrip("'")
         self.assertNotEqual(self.local_version, remote_new_version)
 
