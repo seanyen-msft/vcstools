@@ -54,7 +54,7 @@ class BzrClientTestSetups(unittest.TestCase):
     def setUpClass(self):
         self.root_directory = tempfile.mkdtemp()
         self.directories = dict(setUp=self.root_directory)
-        self.remote_path = os.path.join(self.root_directory, "remote")
+        self.remote_path = os.path.normcase(os.path.join(self.root_directory, "remote"))
         os.makedirs(self.remote_path)
 
         # create a "remote" repo
