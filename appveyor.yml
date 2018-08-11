@@ -9,7 +9,6 @@ environment:
     - PYTHON: "C:\\Python35-x64"
     - PYTHON: "C:\\Python36-x64"
 
-
 install:
   - python --version
   - python -m pip install -U pip setuptools wheel nose mock
@@ -29,13 +28,14 @@ install:
   - bzr --version
   - git --version
   - svn --version
-  - echo "import sys; sys.setdefaultencoding('utf-8')" > %PYTHON%\Lib\site-pacakges\sitecustomize.py
+  - echo "import sys; sys.setdefaultencoding('utf-8')" > %PYTHON%\Lib\site-packages\sitecustomize.py
   - python -c "import sys; print(sys.getdefaultencoding())"
 
 build: none
 
 test_script:
   # Nosetests take care of unit tests
+  - set PATH
   - python -m nose --with-xunit
 
 on_finish:
