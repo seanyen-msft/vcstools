@@ -35,6 +35,7 @@ install:
   - bzr --version
   - git --version
   - svn --version
+  - where python
 
 build: none
 
