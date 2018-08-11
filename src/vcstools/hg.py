@@ -298,9 +298,9 @@ class HgClient(VcsClientBase):
                                          '{autor|email}', '{date|isodate}',
                                          '{desc}']) + '\x1e'
 
-            command = "hg log %s -b %s --template \"%s\" %s" % (sanitized(relpath),
+            command = "hg log %s -b %s --template %s %s" % (sanitized(relpath),
                                                               self.get_branch(),
-                                                              HG_LOG_FORMAT,
+                                                              sanitized(HG_LOG_FORMAT),
                                                               limit_cmd)
             return_code, response_str, stderr = run_shell_command(command, shell=True, cwd=self._path)
 
