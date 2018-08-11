@@ -31,6 +31,8 @@ install:
   - bzr --version
   - git --version
   - svn --version
+  - echo "import sys; reload(sys); sys.setdefaultencoding('utf-8')" > %PYTHON%\Lib\site-packages\sitecustomize.py
+  - python -c "import sys; print(sys.getdefaultencoding())"
 
 build: none
 
