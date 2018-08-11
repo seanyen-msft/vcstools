@@ -32,7 +32,8 @@ install:
   - bzr --version
   - git --version
   - svn --version
-  - dir %PYTHON%\Lib\site-packages\
+  - echo %PYTHON%\Lib\site-packages\
+  - mkdir %PYTHON%\Lib\site-packages\
   - echo "import sys; reload(sys); sys.setdefaultencoding('utf-8')" > %PYTHON%\Lib\site-packages\sitecustomize.py
   - python -c "import sys; print(sys.getdefaultencoding())"
 
