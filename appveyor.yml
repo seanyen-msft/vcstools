@@ -30,7 +30,7 @@ install:
   - SET PATH=C:\Program Files (x86)\GnuWin32\bin\;%PATH%
   - mklink "C:\Program Files (x86)\GnuWin32\bin\tar.exe" "C:\Program Files (x86)\GnuWin32\bin\bsdtar.exe"
   - bzip2 --help
-  - tar --version
+  - where tar
   - hg --version
   - bzr --version
   - git --version
