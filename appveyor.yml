@@ -24,15 +24,17 @@ install:
   - refreshenv
   - ps: |
       Start-FileDownload 'http://liquidtelecom.dl.sourceforge.net/project/gnuwin32/bzip2/1.0.5/bzip2-1.0.5-setup.exe'
+      Start-FileDownload 'http://liquidtelecom.dl.sourceforge.net/project/gnuwin32/libarchive/2.4.12-1/libarchive-2.4.12-1-setup.exe'
       .\bzip2-1.0.5-setup.exe /VERYSILENT
+      .\libarchive-2.4.12-1-setup.exe /VERYSILENT
   - SET PATH=C:\Program Files (x86)\GnuWin32\bin\;%PATH%
+  - mklink "C:\Program Files (x86)\GnuWin32\bin\tar.exe" "C:\Program Files (x86)\GnuWin32\bin\bsdtar.exe"
   - bzip2 --help
   - tar --version
   - hg --version
   - bzr --version
   - git --version
   - svn --version
-  - where tar
 
 build: none
 
