@@ -2,7 +2,6 @@
 # Based on https://github.com/rmcgibbo/python-appveyor-conda-example
 
 environment:
-  PATH: "%PYTHON%\\Scripts;%PYTHON%;%PATH%"
 
   matrix:
     - PYTHON: "C:\\Python27-x64"
@@ -10,11 +9,12 @@ environment:
     - PYTHON: "C:\\Python36-x64"
 
 install:
+  - cinst bzr
+  - refreshenv
+  - set PATH=%PYTHON%\Scripts;%PYTHON%;%PATH%
   - python --version
   - python -m pip install -U pip setuptools wheel nose mock
   - python setup.py install
-  - cinst bzr
-  - refreshenv
   - ps: |
       Start-FileDownload 'http://liquidtelecom.dl.sourceforge.net/project/gnuwin32/bzip2/1.0.5/bzip2-1.0.5-setup.exe'
       Start-FileDownload 'http://liquidtelecom.dl.sourceforge.net/project/gnuwin32/libarchive/2.4.12-1/libarchive-2.4.12-1-setup.exe'
@@ -35,7 +35,6 @@ build: none
 
 test_script:
   # Nosetests take care of unit tests
-  - set PATH
   - python -m nose --with-xunit
 
 on_finish:
