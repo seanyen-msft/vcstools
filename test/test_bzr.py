@@ -105,7 +105,6 @@ class BzrClientTest(BzrClientTestSetups):
     def get_launchpad_info(self, url):
         po = subprocess.Popen(["bzr", "info", url], stdout=subprocess.PIPE)
         output = po.stdout.read()
-        print ("get_launchpad_info:" + output)
         # it is not great to use the same code for testing as in
         # production, but relying on fixed bzr info output is just as
         # bad.

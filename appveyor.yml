@@ -26,6 +26,7 @@ install:
   - where tar
   - hg --version
   - bzr --version
+  - bzr launchpad-login seanyen
   - git --version
   - svn --version
   - echo "import sys; sys.setdefaultencoding('utf-8')" > %PYTHON%\Lib\site-packages\sitecustomize.py
