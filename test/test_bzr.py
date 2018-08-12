@@ -286,7 +286,7 @@ class BzrDiffStatClientTest(BzrClientTestSetups):
         client = BzrClient(self.local_path)
         client.checkout(url)
         # after setting up "local" repo, change files and make some changes
-        subprocess.check_call(["rm", "deleted-fs.txt"], cwd=self.local_path)
+        os.remove(os.path.join(self.local_path, "deleted-fs.txt"))
         subprocess.check_call(["bzr", "rm", "deleted.txt"], cwd=self.local_path)
         f = io.open(os.path.join(self.local_path, "modified.txt"), 'a')
         f.write('0123456789abcdef')

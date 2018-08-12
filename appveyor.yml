@@ -9,8 +9,6 @@ environment:
     - PYTHON: "C:\\Python36-x64"
 
 install:
-  - cinst bzr
-  - refreshenv
   - set PATH=%PYTHON%\Scripts;%PYTHON%;%PATH%
   - python --version
   - python -m pip install -U pip setuptools wheel nose mock
@@ -22,14 +20,14 @@ install:
       .\libarchive-2.4.12-1-setup.exe /VERYSILENT
   - SET PATH=C:\Program Files (x86)\GnuWin32\bin\;%PATH%
   - mklink "C:\Program Files (x86)\GnuWin32\bin\tar.exe" "C:\Program Files (x86)\GnuWin32\bin\bsdtar.exe"
+  - python -m pip install -U bzr --global-option build_ext --global-option --allow-python-fallback
   - bzip2 --help
   - where tar
   - hg --version
   - bzr --version
-  - bzr launchpad-login seanyen
   - git --version
   - svn --version
-  - echo "import sys; sys.setdefaultencoding('utf-8')" > %PYTHON%\Lib\site-packages\sitecustomize.py
+  - echo "import sys; sys.setdefaultencoding('utf-8'); print('mytest')" > %PYTHON%\Lib\site-packages\sitecustomize.py
   - python -c "import sys; print(sys.getdefaultencoding())"
 
 build: none
