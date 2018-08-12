@@ -58,24 +58,24 @@ class BzrClientTestSetups(unittest.TestCase):
         os.makedirs(self.remote_path)
 
         # create a "remote" repo
-        subprocess.check_call(["bzr", "init"], cwd=self.remote_path)
+        subprocess.check_call(["bzr", "init"], shell=True, cwd=self.remote_path)
         _touch(os.path.join(self.remote_path, "fixed.txt"))
-        subprocess.check_call(["bzr", "add", "fixed.txt"], cwd=self.remote_path)
-        subprocess.check_call(["bzr", "commit", "-m", "initial"], cwd=self.remote_path)
-        subprocess.check_call(["bzr", "tag", "test_tag"], cwd=self.remote_path)
+        subprocess.check_call(["bzr", "add", "fixed.txt"], shell=True, cwd=self.remote_path)
+        subprocess.check_call(["bzr", "commit", "-m", "initial"], shell=True, cwd=self.remote_path)
+        subprocess.check_call(["bzr", "tag", "test_tag"], shell=True, cwd=self.remote_path)
         self.local_version_init = "1"
 
         # files to be modified in "local" repo
         _touch(os.path.join(self.remote_path, "modified.txt"))
         _touch(os.path.join(self.remote_path, "modified-fs.txt"))
-        subprocess.check_call(["bzr", "add", "modified.txt", "modified-fs.txt"], cwd=self.remote_path)
-        subprocess.check_call(["bzr", "commit", "-m", "initial"], cwd=self.remote_path)
+        subprocess.check_call(["bzr", "add", "modified.txt", "modified-fs.txt"], shell=True, cwd=self.remote_path)
+        subprocess.check_call(["bzr", "commit", "-m", "initial"], shell=True, cwd=self.remote_path)
         self.local_version_second = "2"
 
         _touch(os.path.join(self.remote_path, "deleted.txt"))
         _touch(os.path.join(self.remote_path, "deleted-fs.txt"))
-        subprocess.check_call(["bzr", "add", "deleted.txt", "deleted-fs.txt"], cwd=self.remote_path)
-        subprocess.check_call(["bzr", "commit", "-m", "modified"], cwd=self.remote_path)
+        subprocess.check_call(["bzr", "add", "deleted.txt", "deleted-fs.txt"], shell=True, cwd=self.remote_path)
+        subprocess.check_call(["bzr", "commit", "-m", "modified"], shell=True, cwd=self.remote_path)
         self.local_version = "3"
 
         self.local_path = os.path.join(self.root_directory, "local")
@@ -103,7 +103,7 @@ class BzrClientTest(BzrClientTestSetups):
         self.assertTrue(client.url_matches('test1234/', 'test1234/'))
 
     def get_launchpad_info(self, url):
-        po = subprocess.Popen(["bzr", "info", url], stdout=subprocess.PIPE)
+        po = subprocess.Popen(["bzr", "info", url], shell=True, stdout=subprocess.PIPE)
         output = po.stdout.read()
         # it is not great to use the same code for testing as in
         # production, but relying on fixed bzr info output is just as
@@ -287,7 +287,7 @@ class BzrDiffStatClientTest(BzrClientTestSetups):
         client.checkout(url)
         # after setting up "local" repo, change files and make some changes
         os.remove(os.path.join(self.local_path, "deleted-fs.txt"))
-        subprocess.check_call(["bzr", "rm", "deleted.txt"], cwd=self.local_path)
+        subprocess.check_call(["bzr", "rm", "deleted.txt"], shell=True, cwd=self.local_path)
         f = io.open(os.path.join(self.local_path, "modified.txt"), 'a')
         f.write('0123456789abcdef')
         f.close()
@@ -300,7 +300,7 @@ class BzrDiffStatClientTest(BzrClientTestSetups):
         f = io.open(os.path.join(self.local_path, "added.txt"), 'w')
         f.write('0123456789abcdef')
         f.close()
-        subprocess.check_call(["bzr", "add", "added.txt"], cwd=self.local_path)
+        subprocess.check_call(["bzr", "add", "added.txt"], shell=True, cwd=self.local_path)
 
     def tearDown(self):
         pass
