@@ -11,6 +11,7 @@ environment:
 install:
   - set PATH=C:\Program Files (x86)\GnuWin32\bin\;%PYTHON%\Scripts;%PYTHON%;%PATH%
   - python --version
+  - python -m site
   - python -m pip install -U pip setuptools wheel nose mock
   - python setup.py install
 
