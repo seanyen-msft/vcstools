@@ -39,7 +39,7 @@ install:
   - ps: |
       $user_site = iex 'python -m site --user-site'
       mkdir $user_site
-      "import sys; sys.setdefaultencoding('utf-8');" | Out-File $(Join-Path $user_site "sitecustomize.py")
+      "import sys; sys.setdefaultencoding('utf-8');" | Out-File -Encoding UTF8 $(Join-Path $user_site "sitecustomize.py")
   - python -c "import sys; print(sys.getdefaultencoding())"
 
 build: none
