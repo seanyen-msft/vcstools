@@ -23,7 +23,7 @@ install:
   - ps: Start-FileDownload 'http://liquidtelecom.dl.sourceforge.net/project/gnuwin32/libarchive/2.4.12-1/libarchive-2.4.12-1-setup.exe'
   - libarchive-2.4.12-1-setup.exe /VERYSILENT
   - mklink "C:\Program Files (x86)\GnuWin32\bin\tar.exe" "C:\Program Files (x86)\GnuWin32\bin\bsdtar.exe"
-  - tar --version
+  - where tar
 
   # install bzr
   - python -m pip install -U bzr --global-option build_ext --global-option --allow-python-fallback
