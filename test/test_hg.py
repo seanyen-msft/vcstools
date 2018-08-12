@@ -39,8 +39,9 @@ import unittest
 import subprocess
 import tempfile
 
+from vcstools.commom import rmtree
 from vcstools.hg import HgClient
-from .util import _touch, _rmtree
+from .util import _touch
 
 
 os.environ[str('EMAIL')] = str('Your Name <name@example.com>')
@@ -111,11 +112,11 @@ class HGClientTestSetups(unittest.TestCase):
     @classmethod
     def tearDownClass(self):
         for d in self.directories:
-            _rmtree(self.directories[d])
+            rmtree(self.directories[d])
 
     def tearDown(self):
         if os.path.exists(self.local_path):
-            _rmtree(self.local_path)
+            rmtree(self.local_path)
 
 
 class HGClientTest(HGClientTestSetups):

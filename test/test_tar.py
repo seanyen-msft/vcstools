@@ -38,8 +38,9 @@ import tempfile
 import subprocess
 import sys
 
+from vcstools.common import rmtree
 from vcstools.tar import TarClient
-from .util import _touch, _rmtree
+from .util import _touch
 
 
 class TarClientTest(unittest.TestCase):
@@ -55,7 +56,7 @@ class TarClientTest(unittest.TestCase):
     def tearDown(self):
         for d in self.directories:
             self.assertTrue(os.path.exists(self.directories[d]))
-            _rmtree(self.directories[d])
+            rmtree(self.directories[d])
             self.assertFalse(os.path.exists(self.directories[d]))
 
     def test_get_url_by_reading(self):
@@ -177,7 +178,7 @@ class TarClientTestLocal(unittest.TestCase):
     def tearDown(self):
         for d in self.directories:
             self.assertTrue(os.path.exists(self.directories[d]))
-            _rmtree(self.directories[d])
+            rmtree(self.directories[d])
             self.assertFalse(os.path.exists(self.directories[d]))
 
     def test_checkout_version_local(self):

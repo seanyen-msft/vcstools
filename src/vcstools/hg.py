@@ -46,7 +46,7 @@ import gzip
 import dateutil.parser  # For parsing date strings
 
 from vcstools.vcs_base import VcsClientBase, VcsError
-from vcstools.common import sanitized, normalized_rel_path, run_shell_command
+from vcstools.common import sanitized, normalized_rel_path, run_shell_command, rmtree
 
 
 def _get_hg_version():
@@ -298,9 +298,9 @@ class HgClient(VcsClientBase):
                                          '{autor|email}', '{date|isodate}',
                                          '{desc}']) + '\x1e'
 
-            command = "hg log %s -b %s --template %s %s" % (sanitized(relpath),
+            command = "hg log %s -b %s --template \"%s\" %s" % (sanitized(relpath),
                                                               self.get_branch(),
-                                                              sanitized(HG_LOG_FORMAT),
+                                                              HG_LOG_FORMAT,
                                                               limit_cmd)
             return_code, response_str, stderr = run_shell_command(command, shell=True, cwd=self._path)
 

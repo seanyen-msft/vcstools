@@ -42,7 +42,8 @@ import subprocess
 import tempfile
 import unittest
 from vcstools.bzr import BzrClient, _get_bzr_version
-from .util import _touch, _rmtree
+from vcstools.common import rmtree
+from .util import _touch
 
 
 os.environ[str('EMAIL')] = str('Your Name <name@example.com>')
@@ -83,11 +84,11 @@ class BzrClientTestSetups(unittest.TestCase):
     @classmethod
     def tearDownClass(self):
         for d in self.directories:
-            _rmtree(self.directories[d])
+            rmtree(self.directories[d])
 
     def tearDown(self):
         if os.path.exists(self.local_path):
-            _rmtree(self.local_path)
+            rmtree(self.local_path)
 
 
 class BzrClientTest(BzrClientTestSetups):
