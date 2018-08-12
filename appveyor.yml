@@ -9,25 +9,32 @@ environment:
     - PYTHON: "C:\\Python36-x64"
 
 install:
-  - set PATH=%PYTHON%\Scripts;%PYTHON%;%PATH%
+  - set PATH=C:\Program Files (x86)\GnuWin32\bin\;%PYTHON%\Scripts;%PYTHON%;%PATH%
   - python --version
   - python -m pip install -U pip setuptools wheel nose mock
   - python setup.py install
-  - ps: |
-      Start-FileDownload 'http://liquidtelecom.dl.sourceforge.net/project/gnuwin32/bzip2/1.0.5/bzip2-1.0.5-setup.exe'
-      Start-FileDownload 'http://liquidtelecom.dl.sourceforge.net/project/gnuwin32/libarchive/2.4.12-1/libarchive-2.4.12-1-setup.exe'
-      .\bzip2-1.0.5-setup.exe /VERYSILENT
-      .\libarchive-2.4.12-1-setup.exe /VERYSILENT
-  - SET PATH=C:\Program Files (x86)\GnuWin32\bin\;%PATH%
-  - dir "C:\Program Files (x86)\GnuWin32" /s
-  - mklink "C:\Program Files (x86)\GnuWin32\bin\tar.exe" "C:\Program Files (x86)\GnuWin32\bin\bsdtar.exe"
-  - python -m pip install -U bzr --global-option build_ext --global-option --allow-python-fallback
+
+  # install bzip2
+  - ps: Start-FileDownload 'http://liquidtelecom.dl.sourceforge.net/project/gnuwin32/bzip2/1.0.5/bzip2-1.0.5-setup.exe'
+  - bzip2-1.0.5-setup.exe /VERYSILENT
   - bzip2 --help
-  - where tar
+
+  # install tar
+  - ps: Start-FileDownload 'http://liquidtelecom.dl.sourceforge.net/project/gnuwin32/libarchive/2.4.12-1/libarchive-2.4.12-1-setup.exe'
+  - libarchive-2.4.12-1-setup.exe /VERYSILENT
+  - mklink "C:\Program Files (x86)\GnuWin32\bin\tar.exe" "C:\Program Files (x86)\GnuWin32\bin\bsdtar.exe"
+  - tar --version
+
+  # install bzr
+  - python -m pip install -U bzr --global-option build_ext --global-option --allow-python-fallback
+
+  # check all version control system versions
   - hg --version
   - bzr --version
   - git --version
   - svn --version
+
+  # change default encoding to utf-8
   - echo "import sys; sys.setdefaultencoding('utf-8'); print('mytest')" > %PYTHON%\Lib\site-packages\sitecustomize.py
   - python -c "import sys; print(sys.getdefaultencoding())"
 
