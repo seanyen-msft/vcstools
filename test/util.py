@@ -1,6 +1,4 @@
 import os
-import shutil
-import stat
 import urllib
 
 def _touch(path):

@@ -43,6 +43,7 @@ import tempfile
 import shutil
 import threading
 import signal
+import stat
 
 try:
     # py3k
