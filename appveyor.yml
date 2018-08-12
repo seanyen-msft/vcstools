@@ -19,6 +19,7 @@ install:
       .\bzip2-1.0.5-setup.exe /VERYSILENT
       .\libarchive-2.4.12-1-setup.exe /VERYSILENT
   - SET PATH=C:\Program Files (x86)\GnuWin32\bin\;%PATH%
+  - dir "C:\Program Files (x86)\GnuWin32" /s
   - mklink "C:\Program Files (x86)\GnuWin32\bin\tar.exe" "C:\Program Files (x86)\GnuWin32\bin\bsdtar.exe"
   - python -m pip install -U bzr --global-option build_ext --global-option --allow-python-fallback
   - bzip2 --help
