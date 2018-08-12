@@ -39,7 +39,7 @@ import unittest
 import subprocess
 import tempfile
 
-from vcstools.commom import rmtree
+from vcstools.common import rmtree
 from vcstools.hg import HgClient
 from .util import _touch
 

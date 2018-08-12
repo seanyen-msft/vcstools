@@ -37,7 +37,6 @@ import os
 import unittest
 import subprocess
 import tempfile
-import shutil
 import tarfile
 import filecmp
 import posixpath

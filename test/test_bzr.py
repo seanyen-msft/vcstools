@@ -37,7 +37,6 @@ import platform
 import os
 import io
 import fnmatch
-import shutil
 import subprocess
 import tempfile
 import unittest
