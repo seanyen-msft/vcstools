@@ -26,8 +26,8 @@ install:
   - mklink "C:\Program Files (x86)\GnuWin32\bin\tar.exe" "C:\Program Files (x86)\GnuWin32\bin\bsdtar.exe"
   - where tar
 
-  # install bzr
-  - python -m pip install -U bzr --global-option build_ext --global-option --allow-python-fallback
+  # install bzr (python 2.7 is required)
+  - c:\python27\python -m pip install -U bzr --global-option build_ext --global-option --allow-python-fallback
 
   # check all version control system versions
   - hg --version
@@ -36,7 +36,9 @@ install:
   - svn --version
 
   # change default encoding to utf-8
-  - echo "import sys; sys.setdefaultencoding('utf-8'); print('mytest')" > %PYTHON%\Lib\site-packages\sitecustomize.py
+  - ps: |
+      $user_site = iex 'python -m site --user-site'
+      "import sys; sys.setdefaultencoding('utf-8');" | Out-File $(Join-Path $user_site "sitecustomize.py")
   - python -c "import sys; print(sys.getdefaultencoding())"
 
 build: none
