@@ -35,12 +35,15 @@ install:
   - git --version
   - svn --version
 
-  # change default encoding to utf-8
+  # change default encoding to utf-8 (for python 2.* only)
   - ps: |
-      $user_site = iex 'python -m site --user-site'
-      mkdir $user_site
-      "import sys; sys.setdefaultencoding('utf-8');" | Out-File -Encoding UTF8 $(Join-Path $user_site "sitecustomize.py")
-  - python -c "import sys; print(sys.getdefaultencoding())"
+      if ($(iex "python -c 'import platform; print(platform.python_version())'") -like "2*")
+      {
+        $user_site = iex 'python -m site --user-site'
+        mkdir $user_site
+        "import sys; sys.setdefaultencoding('utf-8');" | Out-File -Encoding UTF8 $(Join-Path $user_site "sitecustomize.py")
+        python -c "import sys; print(sys.getdefaultencoding())"
+      }
 
 build: none
 
