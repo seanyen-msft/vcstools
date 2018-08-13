@@ -38,6 +38,7 @@ import copy
 import shlex
 import subprocess
 import locale
+import logging
 import netrc
 import tempfile
 import shutil
