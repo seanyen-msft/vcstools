@@ -43,6 +43,7 @@ import tempfile
 import shutil
 import threading
 import signal
+import stat
 
 try:
     # py3k
@@ -356,3 +357,20 @@ def run_shell_command(cmd, cwd=None, shell=False, us_env=True,
         message = "Command failed with OSError. '%s' <%s, %s>:\n%s" % (cmd, shell, cwd, ose)
         logger.error(message)
         raise VcsError(message)
+
+
+def _on_rmtree_error(func, path, exc_info):
+    """
+    path contains the path of the file that couldn't be removed
+    let's just assume that it's read-only and unlink it.
+    """
+    os.chmod(path, stat.S_IWRITE)
+    os.unlink(path)
+
+def rmtree(path):
+    """
+    In some platforms, for example, in Winodws, the shutil.rmtree is not
+    able to delete the read-only files. So when it hits this, try the best
+    effort to remove the read-only attribute and delete it again.
+    """
+    shutil.rmtree(path, onerror = _on_rmtree_error)

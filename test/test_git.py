@@ -44,9 +44,10 @@ import time
 
 from distutils.version import LooseVersion
 from vcstools import GitClient
+from vcstools.common import rmtree
 from vcstools.vcs_base import VcsError
 
-from .util import _touch, _rmtree, _get_file_uri
+from .util import _touch, _get_file_uri
 
 try:
     from socketserver import TCPServer, BaseRequestHandler
@@ -101,11 +102,11 @@ class GitClientTestSetups(unittest.TestCase):
     @classmethod
     def tearDownClass(self):
         for d in self.directories:
-            _rmtree(self.directories[d])
+            rmtree(self.directories[d])
 
     def tearDown(self):
         if os.path.exists(self.local_path):
-            _rmtree(self.local_path)
+            rmtree(self.local_path)
 
 class GitSwitchDefaultBranchTest(GitClientTestSetups):
     def test_get_default_remote_version_label(self):
@@ -1069,8 +1070,8 @@ class GitTimeoutTest(unittest.TestCase):
     def tearDownClass(self):
         self.mute_server.shutdown()
         if os.path.exists(self.root_directory):
-            _rmtree(self.root_directory)
+            rmtree(self.root_directory)
 
     def tearDown(self):
         if os.path.exists(self.local_path):
-            _rmtree(self.local_path)
+            rmtree(self.local_path)

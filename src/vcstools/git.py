@@ -56,7 +56,6 @@ disambiguation, and in some cases warns.
 from __future__ import absolute_import, print_function, unicode_literals
 import os
 import sys
-import shutil
 import tempfile
 import gzip
 import dateutil.parser  # For parsing date strings
@@ -65,7 +64,8 @@ import logging
 import posixpath
 
 from vcstools.vcs_base import VcsClientBase, VcsError
-from vcstools.common import sanitized, normalized_rel_path, run_shell_command
+from vcstools.common import sanitized, normalized_rel_path, run_shell_command, \
+    rmtree
 
 from vcstools.git_archive_all import *
 
@@ -778,7 +778,7 @@ class GitClient(VcsClientBase):
                 else:
                     return False
             finally:
-                shutil.rmtree(tmpd_path)
+                rmtree(tmpd_path)
 
         except GitError:
             return False

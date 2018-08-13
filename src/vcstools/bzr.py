@@ -105,7 +105,9 @@ class BzrClient(VcsClientBase):
                 if (ppath is not None and os.path.isdir(ppath) and not os.path.isabs(ppath)):
                     result = os.path.abspath(os.path.join(os.getcwd(), ppath))
                 else:
-                    result = os.path.normcase(ppath)
+                    result = ppath
+        if result is not None:
+            result = os.path.normcase(result)
         return result
 
     def url_matches(self, url, url_or_shortcut):

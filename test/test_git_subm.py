@@ -37,15 +37,15 @@ import os
 import unittest
 import subprocess
 import tempfile
-import shutil
 import tarfile
 import filecmp
 import posixpath
 from contextlib import closing
 
+from vcstools.common import rmtree
 from vcstools.git import GitClient
 
-from .util import _touch, _rmtree
+from .util import _touch
 
 
 class GitClientTestSetups(unittest.TestCase):
@@ -166,13 +166,13 @@ class GitClientTestSetups(unittest.TestCase):
     @classmethod
     def tearDownClass(self):
         for d in self.directories:
-            _rmtree(self.directories[d])
+            rmtree(self.directories[d])
 
     def tearDown(self):
         if os.path.exists(self.local_path):
-            _rmtree(self.local_path)
+            rmtree(self.local_path)
         if os.path.exists(self.export_path):
-            _rmtree(self.export_path)
+            rmtree(self.export_path)
 
 
 class GitClientTest(GitClientTestSetups):

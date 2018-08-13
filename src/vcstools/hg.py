@@ -46,7 +46,7 @@ import gzip
 import dateutil.parser  # For parsing date strings
 
 from vcstools.vcs_base import VcsClientBase, VcsError
-from vcstools.common import sanitized, normalized_rel_path, run_shell_command
+from vcstools.common import sanitized, normalized_rel_path, run_shell_command, rmtree
 
 
 def _get_hg_version():

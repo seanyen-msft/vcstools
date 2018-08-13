@@ -9,8 +9,9 @@ from mock import Mock
 import vcstools
 from vcstools.vcs_base import VcsClientBase, VcsError
 from vcstools.common import sanitized, normalized_rel_path, \
-    run_shell_command, urlretrieve_netrc, _netrc_open, urlopen_netrc
-from .util import _rmtree, _get_file_uri
+    run_shell_command, urlretrieve_netrc, _netrc_open, urlopen_netrc, \
+    rmtree
+from .util import _get_file_uri
 
 
 class BaseTest(unittest.TestCase):
@@ -111,7 +112,7 @@ class BaseTest(unittest.TestCase):
             filelike = _netrc_open(None, netrcname)
             self.assertFalse(filelike)
         finally:
-            _rmtree(root_directory)
+            rmtree(root_directory)
             vcstools.common.build_opener = back_build_opener
 
     def test_urlopen_netrc(self):
@@ -162,4 +163,4 @@ class BaseTest(unittest.TestCase):
         finally:
             vcstools.common.urlopen = backopen
             vcstools.common._netrc_open = backget
-            _rmtree(root_directory)
+            rmtree(root_directory)
