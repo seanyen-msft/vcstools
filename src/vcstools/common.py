@@ -38,7 +38,6 @@ import copy
 import shlex
 import subprocess
 import locale
-import logging
 import netrc
 import tempfile
 import shutil
@@ -244,7 +243,7 @@ def _read_shell_output(proc, no_filter, verbose, show_stdout, output_queue):
             # while we still can filter out output avoiding readline() because
             # it may block forever
             for line in iter(proc.stdout.readline, b''):
-                line = line.decode(locale.getdefaultencoding(False))
+                line = line.decode(locale.getpreferredencoding(False))
                 if line is not None and line != '':
                     if verbose or not _discard_line(line):
                         sys.stdout.write(line),
@@ -254,7 +253,7 @@ def _read_shell_output(proc, no_filter, verbose, show_stdout, output_queue):
         # stderr was swallowed in pipe, in verbose mode print lines
         if verbose:
             for line in iter(proc.stderr.readline, b''):
-                line = line.decode(locale.getdefaultencoding(False))
+                line = line.decode(locale.getpreferredencoding(False))
                 if line != '':
                     sys.stdout.write(line),
                     stderr_buf.append(line)
