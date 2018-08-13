@@ -243,7 +243,7 @@ def _read_shell_output(proc, no_filter, verbose, show_stdout, output_queue):
             # while we still can filter out output avoiding readline() because
             # it may block forever
             for line in iter(proc.stdout.readline, b''):
-                line = line.decode('UTF-8')
+                line = line.decode(sys.stdout.encoding)
                 if line is not None and line != '':
                     if verbose or not _discard_line(line):
                         sys.stdout.write(line),
@@ -253,7 +253,7 @@ def _read_shell_output(proc, no_filter, verbose, show_stdout, output_queue):
         # stderr was swallowed in pipe, in verbose mode print lines
         if verbose:
             for line in iter(proc.stderr.readline, b''):
-                line = line.decode('UTF-8')
+                line = line.decode(sys.stderr.encoding)
                 if line != '':
                     sys.stdout.write(line),
                     stderr_buf.append(line)
@@ -334,10 +334,10 @@ def run_shell_command(cmd, cwd=None, shell=False, us_env=True,
         stderr_buf = q.get()
 
         if stdout is not None:
-            stdout_buf.append(stdout.decode('utf-8'))
+            stdout_buf.append(stdout.decode(stdout.encoding))
         stdout = "\n".join(stdout_buf)
         if stderr is not None:
-            stderr_buf.append(stderr.decode('utf-8'))
+            stderr_buf.append(stderr.decode(stderr.encoding))
         stderr = "\n".join(stderr_buf)
         message = None
         if proc.returncode != 0 and stderr is not None and stderr != '':
