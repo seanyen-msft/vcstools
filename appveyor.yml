@@ -44,6 +44,9 @@ install:
         "import sys; sys.setdefaultencoding('utf-8');" | Out-File -Encoding UTF8 $(Join-Path $user_site "sitecustomize.py")
         python -c "import sys; print(sys.getdefaultencoding())"
       }
+  
+  # change the console encoding to utf-8
+  - chcp 65001
 
 build: none
 
