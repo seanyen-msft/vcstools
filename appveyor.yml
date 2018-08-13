@@ -14,8 +14,6 @@ install:
   - python -m site
   - python -m pip install -U pip setuptools wheel nose mock
   - python setup.py install
-  - cinst bzr
-  - refreshenv
 
   # install bzip2
   - ps: Start-FileDownload 'http://liquidtelecom.dl.sourceforge.net/project/gnuwin32/bzip2/1.0.5/bzip2-1.0.5-setup.exe'
