@@ -231,6 +231,15 @@ def _discard_line(line):
     return False
 
 
+def _get_io_encoding(stdio):
+    """
+    get stdout\stderr encoding. When it is None, simply assume it is utf-8.
+    """
+    if (hasattr(stdio, 'encoding')):
+        if (stdio.encoding is not None):
+            return stdio.encoding
+    return 'utf-8'
+
 def _read_shell_output(proc, no_filter, verbose, show_stdout, output_queue):
     # when we read output in while loop, it would not be returned
     # in communicate()
@@ -243,7 +252,7 @@ def _read_shell_output(proc, no_filter, verbose, show_stdout, output_queue):
             # while we still can filter out output avoiding readline() because
             # it may block forever
             for line in iter(proc.stdout.readline, b''):
-                line = line.decode(sys.stdout.encoding)
+                line = line.decode(_get_io_encoding(sys.stdout)
                 if line is not None and line != '':
                     if verbose or not _discard_line(line):
                         sys.stdout.write(line),
@@ -253,7 +262,7 @@ def _read_shell_output(proc, no_filter, verbose, show_stdout, output_queue):
         # stderr was swallowed in pipe, in verbose mode print lines
         if verbose:
             for line in iter(proc.stderr.readline, b''):
-                line = line.decode(sys.stderr.encoding)
+                line = line.decode(_get_io_encoding(sys.stderr))
                 if line != '':
                     sys.stdout.write(line),
                     stderr_buf.append(line)
@@ -334,10 +343,10 @@ def run_shell_command(cmd, cwd=None, shell=False, us_env=True,
         stderr_buf = q.get()
 
         if stdout is not None:
-            stdout_buf.append(stdout.decode(sys.stdout.encoding))
+            stdout_buf.append(stdout.decode(_get_io_encoding(sys.stdout)))
         stdout = "\n".join(stdout_buf)
         if stderr is not None:
-            stderr_buf.append(stderr.decode(sys.stderr.encoding))
+            stderr_buf.append(stderr.decode(_get_io_encoding(sys.stderr)))
         stderr = "\n".join(stderr_buf)
         message = None
         if proc.returncode != 0 and stderr is not None and stderr != '':
