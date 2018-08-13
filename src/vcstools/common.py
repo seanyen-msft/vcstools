@@ -252,7 +252,7 @@ def _read_shell_output(proc, no_filter, verbose, show_stdout, output_queue):
             # while we still can filter out output avoiding readline() because
             # it may block forever
             for line in iter(proc.stdout.readline, b''):
-                line = line.decode(_get_io_encoding(sys.stdout)
+                line = line.decode(_get_io_encoding(sys.stdout))
                 if line is not None and line != '':
                     if verbose or not _discard_line(line):
                         sys.stdout.write(line),
