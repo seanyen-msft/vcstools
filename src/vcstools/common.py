@@ -334,10 +334,10 @@ def run_shell_command(cmd, cwd=None, shell=False, us_env=True,
         stderr_buf = q.get()
 
         if stdout is not None:
-            stdout_buf.append(stdout.decode(stdout.encoding))
+            stdout_buf.append(stdout.decode(sys.stdout.encoding))
         stdout = "\n".join(stdout_buf)
         if stderr is not None:
-            stderr_buf.append(stderr.decode(stderr.encoding))
+            stderr_buf.append(stderr.decode(sys.stderr.encoding))
         stderr = "\n".join(stderr_buf)
         message = None
         if proc.returncode != 0 and stderr is not None and stderr != '':
