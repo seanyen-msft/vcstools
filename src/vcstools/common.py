@@ -283,7 +283,7 @@ def run_shell_command(cmd, cwd=None, shell=False, us_env=True,
     try:
         env = copy.copy(os.environ)
         if us_env:
-            env["LANG"] = "en_US.UTF-8"
+            env["LANG".encode('utf8')] = "en_US.UTF-8".encode('utf8')
         if no_filter:
             # in no_filter mode, we cannot pipe stdin, as this
             # causes some prompts to be hidden (e.g. mercurial over
