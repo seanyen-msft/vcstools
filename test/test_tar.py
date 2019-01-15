@@ -64,7 +64,7 @@ def tarfile_contents():
 
     with open(filename, mode='rb') as file: # b is important -> binary
         result = file.read()
-    shutil.rmtree(tar_directory)
+    rmtree(tar_directory)
     return result
 
 
