@@ -70,7 +70,7 @@ def ensure_dir_notexists(path):
     """
     try:
         if os.path.exists(path):
-            os.rmdir(path)
+            rmtree(path)
         return True
     except OSError as ose:
         # ignore if directory
